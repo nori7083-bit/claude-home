@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang='ja'>
+<head>
+  <meta charset='utf-8'>
+  <title>Folder Inventory Dashboard</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f5f7fb; color: #1f2937; }
+    .page { max-width: 1200px; margin: 0 auto; padding: 32px; }
+    h1 { margin-bottom: 8px; }
+    .subtitle { color: #6b7280; margin-bottom: 24px; }
+    .source-card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 18px; box-shadow: 0 8px 24px rgba(15,23,42,.08); }
+    .source-card h2 { margin: 0 0 6px; font-size: 20px; }
+    .source-card p { margin: 0 0 12px; color: #6b7280; font-size: 13px; word-break: break-all; }
+    .tree { list-style: none; padding-left: 0; margin: 0; }
+    .tree ul { list-style: none; padding-left: 18px; margin: 6px 0 0 0; border-left: 1px solid #e5e7eb; }
+    .node { padding: 4px 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .stamp { font-size: 11px; padding: 2px 8px; border-radius: 999px; color: white; }
+    .age-recent { background: #ecfdf3; color: #047857; }
+    .age-weekly { background: #fef3c7; color: #92400e; }
+    .age-monthly { background: #ffedd5; color: #c2410c; }
+    .age-old { background: #fee2e2; color: #b91c1c; }
+    .age-unknown { background: #e5e7eb; color: #374151; }
+  </style>
+</head>
+<body>
+  <div class='page'>
+    <h1>Folder Inventory Dashboard</h1>
+    <p class='subtitle'>PC / Mac / Cloud のフォルダを一覧で確認できる簡易ダッシュボードです。</p>
+    <section class='source-card'><h2>mousouhekio</h2><p>/Users/mousouhekio</p><ul class='tree'>
+<li><div class='node age-recent'>📁 mousouhekio<span class='stamp age-recent'>2026-06-27</span></div><ul>
+  <li><div class='node age-recent'>📁 .cache<span class='stamp age-recent'>2026-06-27</span></div><ul>
+    <li><div class='node age-recent'>📁 codex-runtimes<span class='stamp age-recent'>2026-06-27</span></div></li>
+</ul></li>
+  <li><div class='node age-recent'>📁 .claude<span class='stamp age-recent'>2026-06-27</span></div><ul>
+    <li><div class='node age-recent'>📁 backups<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 cache<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 ide<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 plugins<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 projects<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 session-env<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 sessions<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 .last-cleanup · 24 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 history.jsonl · 255 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 settings.json · 22 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+</ul></li>
+  <li><div class='node age-recent'>📁 .codex<span class='stamp age-recent'>2026-06-27</span></div><ul>
+    <li><div class='node age-recent'>📁 .tmp<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 ambient-suggestions<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 cache<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 computer-use<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 plugins<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 process_manager<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 shell_snapshots<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 skills<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 sqlite<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 tmp<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 vendor_imports<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 .codex-global-state.json · 1519 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 .codex-global-state.json.bak · 1519 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 .personality_migration · 3 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 auth.json · 4619 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 config.toml · 2231 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 goals_1.sqlite · 24576 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 goals_1.sqlite-shm · 32768 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 goals_1.sqlite-wal · 4152 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 installation_id · 36 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 logs_2.sqlite · 7094272 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 logs_2.sqlite-shm · 32768 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 logs_2.sqlite-wal · 4787472 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 memories_1.sqlite · 40960 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 models_cache.json · 147165 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 state_5.sqlite · 4096 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 state_5.sqlite-shm · 32768 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 state_5.sqlite-wal · 1301952 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+</ul></li>
+  <li><div class='node age-recent'>📁 .copilot<span class='stamp age-recent'>2026-06-27</span></div><ul>
+    <li><div class='node age-recent'>📁 ide<span class='stamp age-recent'>2026-06-27</span></div></li>
+</ul></li>
+  <li><div class='node age-old'>📁 .cups<span class='stamp age-old'>2024-02-17</span></div><ul>
+    <li><div class='node age-old'>📄 lpoptions · 25 bytes<span class='stamp age-old'>2025-06-01</span></div></li>
+</ul></li>
+  <li><div class='node age-old'>📁 .dvdcss<span class='stamp age-old'>2025-09-05</span></div><ul>
+    <li><div class='node age-old'>📁 DSTD02237-2004062713560400-000004ea8f<span class='stamp age-old'>2024-12-23</span></div></li>
+    <li><div class='node age-old'>📁 DSTD02237-2004063017001600-0000000000<span class='stamp age-old'>2024-12-24</span></div></li>
+    <li><div class='node age-old'>📁 DSTD02237-2004063017001600-000004ea8f<span class='stamp age-old'>2024-12-24</span></div></li>
+    <li><div class='node age-old'>📁 DVD_VIDEO-2004082011561100-28dbbe021f<span class='stamp age-old'>2024-12-24</span></div></li>
+    <li><div class='node age-old'>📁 RATATOUILLE-2007100419054300-05d788325f<span class='stamp age-old'>2025-09-05</span></div></li>
+    <li><div class='node age-old'>📁 V_______H-2015102713512900-0000000000<span class='stamp age-old'>2024-07-27</span></div></li>
+    <li><div class='node age-old'>📄 CACHEDIR.TAG · 199 bytes<span class='stamp age-old'>2025-09-05</span></div></li>
+</ul></li>
+  <li><div class='node age-recent'>📁 .npm<span class='stamp age-recent'>2026-06-27</span></div><ul>
+    <li><div class='node age-recent'>📁 _cacache<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 _logs<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 _update-notifier-last-checked · 0 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+</ul></li>
+  <li><div class='node age-recent'>📁 .Trash<span class='stamp age-recent'>2026-06-27</span></div></li>
+  <li><div class='node age-recent'>📁 .vscode<span class='stamp age-recent'>2026-06-27</span></div><ul>
+    <li><div class='node age-recent'>📁 cli<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 extensions<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 argv.json · 815 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+</ul></li>
+  <li><div class='node age-recent'>📁 .vscode-shared<span class='stamp age-recent'>2026-06-27</span></div><ul>
+    <li><div class='node age-recent'>📁 sharedStorage<span class='stamp age-recent'>2026-06-27</span></div></li>
+</ul></li>
+  <li><div class='node age-old'>📁 .zsh_sessions<span class='stamp age-old'>2024-02-29</span></div><ul>
+    <li><div class='node age-old'>📄 _expiration_check_timestamp · 0 bytes<span class='stamp age-old'>2024-02-29</span></div></li>
+    <li><div class='node age-old'>📄 E507FAB0-2FDC-45FB-AC36-47E037B2970A.history · 0 bytes<span class='stamp age-old'>2024-02-29</span></div></li>
+    <li><div class='node age-old'>📄 E507FAB0-2FDC-45FB-AC36-47E037B2970A.session · 52 bytes<span class='stamp age-old'>2024-02-29</span></div></li>
+</ul></li>
+  <li><div class='node age-recent'>📁 Applications<span class='stamp age-recent'>2026-06-27</span></div><ul>
+    <li><div class='node age-old'>📁 Chrome Apps.localized<span class='stamp age-old'>2025-08-21</span></div></li>
+    <li><div class='node age-recent'>📁 Claude Code URL Handler.app<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 .DS_Store · 6148 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-old'>📄 .localized · 0 bytes<span class='stamp age-old'>2024-03-02</span></div></li>
+</ul></li>
+  <li><div class='node age-recent'>📁 Desktop<span class='stamp age-recent'>2026-06-27</span></div><ul>
+    <li><div class='node age-monthly'>📁 202601の資料_公文<span class='stamp age-monthly'>2026-04-11</span></div></li>
+    <li><div class='node age-recent'>📁 ﾌﾟﾛｼﾞｪｸﾄﾌｫﾙﾀﾞ_Claudeのお家<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 .DS_Store · 8196 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-old'>📄 .localized · 0 bytes<span class='stamp age-old'>2015-03-23</span></div></li>
+    <li><div class='node age-old'>📄 1c原状復帰.pdf · 257947 bytes<span class='stamp age-old'>2023-08-27</span></div></li>
+    <li><div class='node age-old'>📄 20220219_A_.xlsx · 7717140 bytes<span class='stamp age-old'>2022-02-09</span></div></li>
+    <li><div class='node age-old'>📄 CF2023_08.pdf · 799393 bytes<span class='stamp age-old'>2023-08-27</span></div></li>
+    <li><div class='node age-old'>📄 画面収録 2025-07-20 10.04.36.mov · 3839199245 bytes<span class='stamp age-old'>2025-07-20</span></div></li>
+    <li><div class='node age-old'>📄 画面収録 2025-07-20 10.45.40.mov · 4800570875 bytes<span class='stamp age-old'>2025-07-20</span></div></li>
+    <li><div class='node age-weekly'>📄 画面収録 2026-06-11 0.14.04.mov · 8668531158 bytes<span class='stamp age-weekly'>2026-06-11</span></div></li>
+</ul></li>
+  <li><div class='node age-recent'>📁 Documents<span class='stamp age-recent'>2026-06-27</span></div><ul>
+    <li><div class='node age-old'>📁 .evernote<span class='stamp age-old'>2024-02-03</span></div></li>
+    <li><div class='node age-recent'>📁 Codex<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-monthly'>📁 Evernote<span class='stamp age-monthly'>2026-03-10</span></div></li>
+    <li><div class='node age-old'>📁 Microsoft ユーザー データ<span class='stamp age-old'>2025-02-02</span></div></li>
+    <li><div class='node age-old'>📁 ScanSnap Home folder<span class='stamp age-old'>2023-02-07</span></div></li>
+    <li><div class='node age-old'>📁 Wondershare dr.fone for iOS<span class='stamp age-old'>2020-07-11</span></div></li>
+    <li><div class='node age-old'>📁 Zoom<span class='stamp age-old'>2020-09-07</span></div></li>
+    <li><div class='node age-old'>📁 書類 - 公文範行 の MacBook Air<span class='stamp age-old'>2023-11-29</span></div></li>
+    <li><div class='node age-old'>📁 書類 - 孟宗碧尾’s MacBook Air<span class='stamp age-old'>2024-10-04</span></div></li>
+    <li><div class='node age-monthly'>📄 .DS_Store · 10244 bytes<span class='stamp age-monthly'>2026-05-18</span></div></li>
+    <li><div class='node age-old'>📄 .localized · 0 bytes<span class='stamp age-old'>2015-03-23</span></div></li>
+    <li><div class='node age-recent'>📄 20240207_送金の御案内.jpg · 379628 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20240207_送金の御案内_001.jpg · 278991 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20240207_送金の御案内_002.jpg · 243729 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260101_令和8年度固定資産税・都市計画税課税明細書.jpg · 502536 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260401_令和8年度固測兇･都市計画脱(土地･家屋．隣ﾛ資産)〃脱融晤.jpg · 353463 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260401_令和8年度固測兇･都市計画脱(土地･家屋．隣ﾛ資産)〃脱融晤_001.jpg · 409279 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-monthly'>📄 20260403_送金の御案内.jpg · 361526 bytes<span class='stamp age-monthly'>2026-04-03</span></div></li>
+    <li><div class='node age-monthly'>📄 20260403_送金の御案内_001.jpg · 223973 bytes<span class='stamp age-monthly'>2026-04-03</span></div></li>
+    <li><div class='node age-monthly'>📄 20260403_送金の御案内_002.jpg · 261032 bytes<span class='stamp age-monthly'>2026-04-03</span></div></li>
+    <li><div class='node age-recent'>📄 20260416_自動車保険お見積書.jpg · 501723 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260416_自動車保険お見積書_001.jpg · 437077 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260416_自動車保険お見積書_002.jpg · 337839 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260416_自動車保険お見積書_003.jpg · 208019 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260416_自動車保険お見積書_004.jpg · 475611 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260416_自動車保険お見積書_005.jpg · 485549 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260416_自動車保険お見積書_006.jpg · 269202 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625.jpg · 214549 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_001.jpg · 209906 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_002.jpg · 364112 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_003.jpg · 389464 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_004.jpg · 426591 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_005.jpg · 204161 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_006.jpg · 310883 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_007.jpg · 136829 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_008.jpg · 379972 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_009.jpg · 338592 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_010.jpg · 422599 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_011.jpg · 428494 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_012.jpg · 426828 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_013.jpg · 325980 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_014.jpg · 325653 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_015.jpg · 236300 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_016.jpg · 201648 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_017.jpg · 217886 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_018.jpg · 217747 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_019.jpg · 231311 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_020.jpg · 249849 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_021.jpg · 208456 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_022.jpg · 292034 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_023.jpg · 234208 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_024.jpg · 158260 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_025.jpg · 108599 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_026.jpg · 90982 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_027.jpg · 149409 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_028.jpg · 138813 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_029.jpg · 231374 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_030.jpg · 177895 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_031.jpg · 337337 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_032.jpg · 222048 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_033.jpg · 136352 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_034.jpg · 414873 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_035.jpg · 473831 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_036.jpg · 411286 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_037.jpg · 345232 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_038.jpg · 201576 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_039.jpg · 375791 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_040.jpg · 306346 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_041.jpg · 352458 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_042.jpg · 364096 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_043.jpg · 239120 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_044.jpg · 199676 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_045.jpg · 206208 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_046.jpg · 220929 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_047.jpg · 315886 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_048.jpg · 174370 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_049.jpg · 225320 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_050.jpg · 274316 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_051.jpg · 323104 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_052.jpg · 464671 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_053.jpg · 252813 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_054.jpg · 472853 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_055.jpg · 286501 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_改蕊アプラス.jpg · 314528 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_改蕊アプラス_001.jpg · 309159 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_改蕊アプラス_002.jpg · 485276 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_送金の御案内.jpg · 371623 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_送金の御案内_001.jpg · 268898 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_送金の御案内_002.jpg · 278310 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_送金の御案内_003.jpg · 351507 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_送金の御案内_004.jpg · 213159 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_送金の御案内_005.jpg · 261787 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_送金の御案内_006.jpg · 362116 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_送金の御案内_007.jpg · 243812 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_送金の御案内_008.jpg · 205988 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_送金の御案内_009.jpg · 356134 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_送金の御案内_010.jpg · 244580 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-recent'>📄 20260625_送金の御案内_011.jpg · 202993 bytes<span class='stamp age-recent'>2026-06-25</span></div></li>
+</ul></li>
+  <li><div class='node age-recent'>📁 Downloads<span class='stamp age-recent'>2026-06-27</span></div><ul>
+    <li><div class='node age-old'>📁 .evernote<span class='stamp age-old'>2024-02-28</span></div></li>
+    <li><div class='node age-monthly'>📁 修正後<span class='stamp age-monthly'>2026-03-10</span></div></li>
+    <li><div class='node age-recent'>📄 .DS_Store · 14340 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-old'>📄 .localized · 0 bytes<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-monthly'>📄 0882027e-5632-4bd7-84a2-e46cb0634f8c.pdf · 70777 bytes<span class='stamp age-monthly'>2026-01-29</span></div></li>
+    <li><div class='node age-weekly'>📄 2026_仕訳日記帳.csv · 4447 bytes<span class='stamp age-weekly'>2026-06-04</span></div></li>
+    <li><div class='node age-monthly'>📄 24797_calendar_annual.xlsx · 27666 bytes<span class='stamp age-monthly'>2026-01-29</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２３年0２月作成分）.pdf · 46155 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２３年0３月作成分）.pdf · 55387 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-old'>📄 3193252_お取引明細表（２０２３年0４月作成分）.pdf · 45353 bytes<span class='stamp age-old'>2024-01-28</span></div></li>
+    <li><div class='node age-old'>📄 3193252_お取引明細表（２０２３年0５月作成分）.pdf · 45419 bytes<span class='stamp age-old'>2024-01-28</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２３年0６月作成分）.pdf · 45166 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２３年0７月作成分）.pdf · 44922 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２３年0８月作成分）.pdf · 44959 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２３年0９月作成分）.pdf · 43402 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２３年１０月作成分）.pdf · 44008 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２３年１１月作成分）.pdf · 44128 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２３年１２月作成分）.pdf · 44227 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２４年0１月作成分）.pdf · 44938 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２４年0２月作成分）.pdf · 45045 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２４年0３月作成分）.pdf · 55258 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２４年0４月作成分）.pdf · 44914 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２４年0５月作成分）.pdf · 44912 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２４年0６月作成分）.pdf · 45334 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２４年0７月作成分）.pdf · 44900 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２４年0８月作成分）.pdf · 45194 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２４年0９月作成分）.pdf · 44903 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２４年１０月作成分）.pdf · 45481 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２４年１１月作成分）.pdf · 45090 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２４年１２月作成分）.pdf · 44902 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-old'>📄 3193252_お取引明細表（２０２５年0１月作成分）.pdf · 44893 bytes<span class='stamp age-old'>2025-06-10</span></div></li>
+    <li><div class='node age-old'>📄 3193252_お取引明細表（２０２５年0２月作成分）.pdf · 45048 bytes<span class='stamp age-old'>2025-06-10</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２５年0３月作成分）.pdf · 54840 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２５年0４月作成分）.pdf · 44909 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２５年0５月作成分）.pdf · 44977 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２５年0６月作成分）.pdf · 45211 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２５年0７月作成分）.pdf · 44946 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２５年0８月作成分）.pdf · 45015 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２５年0９月作成分）.pdf · 44951 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２５年１０月作成分）.pdf · 45175 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２５年１１月作成分）.pdf · 45129 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２５年１２月作成分）.pdf · 44943 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3193252_お取引明細表（２０２６年0１月作成分）.pdf · 44951 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２３年0２月作成分）.pdf · 44723 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２３年0３月作成分）.pdf · 54874 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２３年0４月作成分）.pdf · 44630 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２３年0５月作成分）.pdf · 44637 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２３年0６月作成分）.pdf · 44645 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２３年0７月作成分）.pdf · 45226 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２３年0８月作成分）.pdf · 44928 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２３年0９月作成分）.pdf · 42739 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２３年１０月作成分）.pdf · 43900 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２３年１１月作成分）.pdf · 42907 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２３年１２月作成分）.pdf · 42476 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２４年0１月作成分）.pdf · 43092 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２４年0２月作成分）.pdf · 43215 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２４年0３月作成分）.pdf · 53039 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２４年0４月作成分）.pdf · 43100 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２４年0５月作成分）.pdf · 43094 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２４年0６月作成分）.pdf · 43096 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２４年0７月作成分）.pdf · 43099 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２４年0８月作成分）.pdf · 43223 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２４年0９月作成分）.pdf · 42896 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２４年１０月作成分）.pdf · 42902 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２４年１１月作成分）.pdf · 43100 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２４年１２月作成分）.pdf · 42896 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２５年0１月作成分）.pdf · 43112 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２５年0２月作成分）.pdf · 43217 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２５年0３月作成分）.pdf · 53030 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２５年0４月作成分）.pdf · 43123 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２５年0５月作成分）.pdf · 43135 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２５年0６月作成分）.pdf · 43148 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 3473135_お取引明細表（２０２５年0８月作成分）.pdf · 41233 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-monthly'>📄 41000046_支払証明書_2025.pdf · 226036 bytes<span class='stamp age-monthly'>2026-02-14</span></div></li>
+    <li><div class='node age-monthly'>📄 accounts-receivable-by-company-1.xlsx · 12821 bytes<span class='stamp age-monthly'>2026-01-13</span></div></li>
+    <li><div class='node age-monthly'>📄 BLS2025更新修了証.pdf · 444370 bytes<span class='stamp age-monthly'>2026-04-23</span></div></li>
+    <li><div class='node age-recent'>📄 ChatGPT.dmg · 72674094 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-monthly'>📄 ChatGPT_Atlas.dmg · 252284012 bytes<span class='stamp age-monthly'>2026-02-12</span></div></li>
+    <li><div class='node age-recent'>📄 Claude.dmg · 307026523 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📄 Codex.dmg · 529667527 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-old'>📄 download.zip · 109130717 bytes<span class='stamp age-old'>2025-09-07</span></div></li>
+    <li><div class='node age-recent'>📄 DVT予防_イラスト入りパンフレット_A4横.pptx · 29977 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-monthly'>📄 ec243d00-e9cd-450f-859c-cf12a0b6b66a.pdf · 70769 bytes<span class='stamp age-monthly'>2026-01-29</span></div></li>
+    <li><div class='node age-old'>📄 examTicket_20251214_202634.pdf · 73030 bytes<span class='stamp age-old'>2025-12-14</span></div></li>
+    <li><div class='node age-old'>📄 IMG_1272.MOV · 4652666688 bytes<span class='stamp age-old'>2025-10-29</span></div></li>
+    <li><div class='node age-monthly'>📄 IMG_4712.MOV · 739001687 bytes<span class='stamp age-monthly'>2025-12-29</span></div></li>
+    <li><div class='node age-old'>📄 IMG_8038.PNG · 212232 bytes<span class='stamp age-old'>2025-10-06</span></div></li>
+    <li><div class='node age-monthly'>📄 iryouhi_form_v3.1.xlsx · 423539 bytes<span class='stamp age-monthly'>2026-02-15</span></div></li>
+    <li><div class='node age-old'>📄 moushikomiNaiyouKakuninsho_20251201_214126.pdf · 58028 bytes<span class='stamp age-old'>2025-12-01</span></div></li>
+    <li><div class='node age-monthly'>📄 r7syouhi_smart 3.data · 170095 bytes<span class='stamp age-monthly'>2026-03-15</span></div></li>
+    <li><div class='node age-monthly'>📄 receipt_20260201230818.pdf · 168043 bytes<span class='stamp age-monthly'>2026-02-01</span></div></li>
+    <li><div class='node age-recent'>📄 Typeless-1.8.0-arm64.dmg · 171020970 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-monthly'>📄 お取引明細表（２０２６年１月作成分） (1).pdf · 44951 bytes<span class='stamp age-monthly'>2026-04-11</span></div></li>
+    <li><div class='node age-monthly'>📄 お取引明細表（２０２６年１月作成分）.pdf · 44951 bytes<span class='stamp age-monthly'>2026-04-11</span></div></li>
+    <li><div class='node age-monthly'>📄 ハートセイバー修了証2025.pdf · 479263 bytes<span class='stamp age-monthly'>2026-04-23</span></div></li>
+    <li><div class='node age-monthly'>📄 複式簿記ExcelF(試作版 Ver.0.3.1)入力参考①.xlsx · 87965 bytes<span class='stamp age-monthly'>2026-02-10</span></div></li>
+    <li><div class='node age-monthly'>📄 複式簿記ExcelF(試作版 Ver.0.3.1)入力参考②.xlsx · 84188 bytes<span class='stamp age-monthly'>2026-02-07</span></div></li>
+</ul></li>
+  <li><div class='node age-monthly'>📁 Library<span class='stamp age-monthly'>2026-02-07</span></div><ul>
+    <li><div class='node age-old'>📁 Accessibility<span class='stamp age-old'>2024-02-15</span></div></li>
+    <li><div class='node age-weekly'>📁 Accounts<span class='stamp age-weekly'>2026-06-03</span></div></li>
+    <li><div class='node age-old'>📁 AppleMediaServices<span class='stamp age-old'>2025-08-25</span></div></li>
+    <li><div class='node age-recent'>📁 Application Scripts<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 Application Support<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 Assistant<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-old'>📁 Assistants<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-old'>📁 Audio<span class='stamp age-old'>2025-08-25</span></div></li>
+    <li><div class='node age-monthly'>📁 Autosave Information<span class='stamp age-monthly'>2026-02-11</span></div></li>
+    <li><div class='node age-old'>📁 Biome<span class='stamp age-old'>2025-08-25</span></div></li>
+    <li><div class='node age-recent'>📁 Caches<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 Calendars<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-old'>📁 CallServices<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-old'>📁 CloudStorage<span class='stamp age-old'>2024-02-15</span></div></li>
+    <li><div class='node age-old'>📁 ColorPickers<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-monthly'>📁 Colors<span class='stamp age-monthly'>2026-01-29</span></div></li>
+    <li><div class='node age-old'>📁 com.apple.aiml.instrumentation<span class='stamp age-old'>2025-08-25</span></div></li>
+    <li><div class='node age-old'>📁 com.apple.appleaccountd<span class='stamp age-old'>2025-08-25</span></div></li>
+    <li><div class='node age-old'>📁 com.apple.AppleMediaServices<span class='stamp age-old'>2024-02-16</span></div></li>
+    <li><div class='node age-old'>📁 com.apple.bluetooth.services.cloud<span class='stamp age-old'>2025-08-25</span></div></li>
+    <li><div class='node age-old'>📁 com.apple.bluetoothuser<span class='stamp age-old'>2024-02-15</span></div></li>
+    <li><div class='node age-old'>📁 com.apple.icloud.searchpartyd<span class='stamp age-old'>2025-08-25</span></div></li>
+    <li><div class='node age-old'>📁 com.apple.internal.ck<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-old'>📁 com.apple.iTunesCloud<span class='stamp age-old'>2024-02-15</span></div></li>
+    <li><div class='node age-old'>📁 Compositions<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-old'>📁 Contacts<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-monthly'>📁 ContainerManager<span class='stamp age-monthly'>2026-04-19</span></div></li>
+    <li><div class='node age-recent'>📁 Containers<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-old'>📁 Cookies<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-monthly'>📁 CoreFollowUp<span class='stamp age-monthly'>2026-04-03</span></div></li>
+    <li><div class='node age-old'>📁 Daemon Containers<span class='stamp age-old'>2025-08-25</span></div></li>
+    <li><div class='node age-old'>📁 DataAccess<span class='stamp age-old'>2024-02-15</span></div></li>
+    <li><div class='node age-recent'>📁 DataDeliveryServices<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-old'>📁 DES<span class='stamp age-old'>2025-08-25</span></div></li>
+    <li><div class='node age-recent'>📁 Dictionaries<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-old'>📁 DoNotDisturb<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-old'>📁 DuetExpertCenter<span class='stamp age-old'>2025-08-25</span></div></li>
+    <li><div class='node age-old'>📁 Edraw<span class='stamp age-old'>2024-03-17</span></div></li>
+    <li><div class='node age-old'>📁 Favorites<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-old'>📁 Finance<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-old'>📁 FontCollections<span class='stamp age-old'>2025-02-22</span></div></li>
+    <li><div class='node age-old'>📁 Fonts<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-old'>📁 FrontBoard<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-old'>📁 GameKit<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-old'>📁 Google<span class='stamp age-old'>2025-06-20</span></div></li>
+    <li><div class='node age-recent'>📁 Group Containers<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 GroupContainersAlias<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-old'>📁 homeenergyd<span class='stamp age-old'>2024-04-20</span></div></li>
+    <li><div class='node age-recent'>📁 HomeKit<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 HTTPStorages<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 IdentityServices<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-old'>📁 Input Methods<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-old'>📁 IntelligencePlatform<span class='stamp age-old'>2024-02-15</span></div></li>
+    <li><div class='node age-old'>📁 Intents<span class='stamp age-old'>2024-03-29</span></div></li>
+    <li><div class='node age-old'>📁 Internet Plug-Ins<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-old'>📁 iTunes<span class='stamp age-old'>2024-03-03</span></div></li>
+    <li><div class='node age-old'>📁 Keyboard Layouts<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-old'>📁 KeyboardServices<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-recent'>📁 Keychains<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-monthly'>📁 LanguageModeling<span class='stamp age-monthly'>2026-03-19</span></div></li>
+    <li><div class='node age-recent'>📁 LaunchAgents<span class='stamp age-recent'>2026-06-25</span></div></li>
+    <li><div class='node age-old'>📁 LockdownMode<span class='stamp age-old'>2024-07-15</span></div></li>
+    <li><div class='node age-recent'>📁 Logs<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-old'>📁 Mail<span class='stamp age-old'>2024-09-17</span></div></li>
+    <li><div class='node age-old'>📁 Messages<span class='stamp age-old'>2025-08-25</span></div></li>
+    <li><div class='node age-old'>📁 Metadata<span class='stamp age-old'>2025-08-25</span></div></li>
+    <li><div class='node age-old'>📁 Mobile Documents<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-old'>📁 News<span class='stamp age-old'>2024-02-15</span></div></li>
+    <li><div class='node age-recent'>📁 Passes<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-monthly'>📁 PDF Services<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-old'>📁 PersonalizationPortrait<span class='stamp age-old'>2025-08-25</span></div></li>
+    <li><div class='node age-old'>📁 Photos<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-old'>📁 PreferencePanes<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-recent'>📁 Preferences<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-old'>📁 Printers<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-old'>📁 Reminders<span class='stamp age-old'>2024-02-15</span></div></li>
+    <li><div class='node age-old'>📁 ResponseKit<span class='stamp age-old'>2024-03-15</span></div></li>
+    <li><div class='node age-recent'>📁 Safari<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-old'>📁 SafariSafeBrowsing<span class='stamp age-old'>2025-10-06</span></div></li>
+    <li><div class='node age-old'>📁 SafariSandboxBroker<span class='stamp age-old'>2024-03-30</span></div></li>
+    <li><div class='node age-recent'>📁 Saved Application State<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-old'>📁 Saved Searches<span class='stamp age-old'>2025-02-06</span></div></li>
+    <li><div class='node age-old'>📁 Screen Savers<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-monthly'>📁 Scripts<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-old'>📁 Services<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-old'>📁 Sharing<span class='stamp age-old'>2025-08-25</span></div></li>
+    <li><div class='node age-recent'>📁 Shortcuts<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-old'>📁 Sounds<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-monthly'>📁 Speech<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-old'>📁 Spelling<span class='stamp age-old'>2024-02-15</span></div></li>
+    <li><div class='node age-old'>📁 Staging<span class='stamp age-old'>2024-02-15</span></div></li>
+    <li><div class='node age-old'>📁 StatusKit<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-recent'>📁 studentd<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-recent'>📁 Suggestions<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-old'>📁 SyncedPreferences<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-recent'>📁 Translation<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-old'>📁 Trial<span class='stamp age-old'>2025-08-25</span></div></li>
+    <li><div class='node age-recent'>📁 UnifiedAssetFramework<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-monthly'>📁 Weather<span class='stamp age-monthly'>2026-05-15</span></div></li>
+    <li><div class='node age-weekly'>📁 WebKit<span class='stamp age-weekly'>2026-06-08</span></div></li>
+    <li><div class='node age-monthly'>📁 Workflows<span class='stamp age-monthly'>2026-02-07</span></div></li>
+    <li><div class='node age-old'>📄 .DS_Store · 24580 bytes<span class='stamp age-old'>2025-08-25</span></div></li>
+    <li><div class='node age-old'>📄 .localized · 0 bytes<span class='stamp age-old'>2024-02-14</span></div></li>
+</ul></li>
+  <li><div class='node age-weekly'>📁 Movies<span class='stamp age-weekly'>2026-06-01</span></div><ul>
+    <li><div class='node age-weekly'>📁 iMovie Theater.theater<span class='stamp age-weekly'>2026-06-10</span></div></li>
+    <li><div class='node age-monthly'>📁 iMovieライブラリ.imovielibrary<span class='stamp age-monthly'>2026-04-19</span></div></li>
+    <li><div class='node age-old'>📁 iMovieラブリ_MAC本体.imovielibrary<span class='stamp age-old'>2025-12-01</span></div></li>
+    <li><div class='node age-old'>📁 JianyingPro<span class='stamp age-old'>2025-02-07</span></div></li>
+    <li><div class='node age-old'>📁 Motion Templates.localized<span class='stamp age-old'>2025-03-15</span></div></li>
+    <li><div class='node age-weekly'>📁 TV<span class='stamp age-weekly'>2026-05-31</span></div></li>
+    <li><div class='node age-weekly'>📄 .DS_Store · 10244 bytes<span class='stamp age-weekly'>2026-05-31</span></div></li>
+    <li><div class='node age-old'>📄 .localized · 0 bytes<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-weekly'>📄 202512_CHACHACHA - 1080WebShareName.mov · 1590691164 bytes<span class='stamp age-weekly'>2026-06-02</span></div></li>
+</ul></li>
+  <li><div class='node age-old'>📁 Music<span class='stamp age-old'>2025-02-02</span></div><ul>
+    <li><div class='node age-old'>📁 Audio Music Apps<span class='stamp age-old'>2025-02-02</span></div></li>
+    <li><div class='node age-old'>📁 GarageBand<span class='stamp age-old'>2024-03-02</span></div></li>
+    <li><div class='node age-old'>📁 Music<span class='stamp age-old'>2025-02-02</span></div></li>
+    <li><div class='node age-old'>📄 .DS_Store · 6148 bytes<span class='stamp age-old'>2025-08-25</span></div></li>
+    <li><div class='node age-old'>📄 .localized · 0 bytes<span class='stamp age-old'>2024-02-14</span></div></li>
+</ul></li>
+  <li><div class='node age-old'>📁 Pictures<span class='stamp age-old'>2025-08-02</span></div><ul>
+    <li><div class='node age-weekly'>📁 Apowersoft Screenshot<span class='stamp age-weekly'>2026-05-31</span></div></li>
+    <li><div class='node age-old'>📁 Photo Boothライブラリ<span class='stamp age-old'>2024-03-06</span></div></li>
+    <li><div class='node age-recent'>📁 Photos Library.photoslibrary<span class='stamp age-recent'>2026-06-27</span></div></li>
+    <li><div class='node age-weekly'>📄 .DS_Store · 10244 bytes<span class='stamp age-weekly'>2026-05-31</span></div></li>
+    <li><div class='node age-old'>📄 .localized · 0 bytes<span class='stamp age-old'>2024-02-14</span></div></li>
+</ul></li>
+  <li><div class='node age-old'>📁 Public<span class='stamp age-old'>2025-02-07</span></div><ul>
+    <li><div class='node age-old'>📁 Drop Box<span class='stamp age-old'>2024-02-14</span></div></li>
+    <li><div class='node age-old'>📄 .DS_Store · 6148 bytes<span class='stamp age-old'>2025-03-15</span></div></li>
+    <li><div class='node age-old'>📄 .localized · 0 bytes<span class='stamp age-old'>2024-02-14</span></div></li>
+</ul></li>
+  <li><div class='node age-recent'>📄 .bash_history · 117 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+  <li><div class='node age-old'>📄 .CFUserTextEncoding · 7 bytes<span class='stamp age-old'>2024-02-14</span></div></li>
+  <li><div class='node age-recent'>📄 .claude.json · 31163 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+  <li><div class='node age-recent'>📄 .DS_Store · 26628 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+  <li><div class='node age-recent'>📄 .zsh_history · 97 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+  <li><div class='node age-recent'>📄 Claud.md · 1745 bytes<span class='stamp age-recent'>2026-06-27</span></div></li>
+</ul></li>
+</ul></section>
+  </div>
+</body>
+</html>
