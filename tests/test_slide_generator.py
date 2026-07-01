@@ -44,5 +44,22 @@ class SlideGeneratorTests(unittest.TestCase):
             self.assertIn("<section class=\"slide\">", html)
 
 
+    def test_cli_custom_title(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            input_path = Path(tmp_dir) / "deck.md"
+            output_path = Path(tmp_dir) / "deck.html"
+            input_path.write_text("# Slide\n\nContent", encoding="utf-8")
+
+            subprocess.run(
+                [sys.executable, str(SCRIPT), str(input_path), str(output_path), "--title", "Custom Title"],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            html = output_path.read_text(encoding="utf-8")
+            self.assertIn("<title>Custom Title</title>", html)
+
+
 if __name__ == "__main__":
     unittest.main()
