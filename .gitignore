@@ -1,0 +1,16 @@
+# Mac のシステムファイル
+.DS_Store
+
+# 個人情報を含むファイル（GitHubにアップロードしない）
+みずほ銀行*
+sysdiagnose_*/
+
+# 開発環境・キャッシュ
+.venv/
+node_modules/
+.claude/
+
+# 音声文字起こしサポーターの大きいファイル・録音データ
+audio-transcription-supporter/models/*.bin
+audio-transcription-supporter/recordings/*.wav
+audio-transcription-supporter/transcripts/*.txt

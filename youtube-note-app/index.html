@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube学習ノート</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ヘッダー -->
+<header class="header">
+  <div class="header-left">
+    <span class="header-logo">📚</span>
+    <h1 class="header-title">YouTube学習ノート</h1>
+  </div>
+  <div class="header-center">
+    <input type="text" id="search-input" class="search-input" placeholder="🔍 動画を検索...">
+  </div>
+  <div class="header-right">
+    <button class="btn btn-primary" id="add-video-btn">＋ 動画を追加</button>
+    <button class="btn btn-secondary" id="export-btn">📤 書き出し</button>
+    <label class="btn btn-secondary" for="import-file">📥 読み込み</label>
+    <input type="file" id="import-file" accept=".json" style="display:none">
+    <button class="btn btn-clear" id="clear-all-btn">🗑 全クリア</button>
+  </div>
+</header>
+
+<!-- メインレイアウト -->
+<div class="layout">
+
+  <!-- サイドバートグルタブ -->
+  <button class="sidebar-tab" id="sidebar-toggle-btn">
+    <span class="sidebar-tab-arrow" id="sidebar-tab-arrow">◀</span>
+    <span class="sidebar-tab-text">メニュー</span>
+  </button>
+
+  <!-- 左サイドバー -->
+  <aside class="sidebar">
+
+    <!-- 表示モード -->
+    <div class="sidebar-section">
+      <h3 class="sidebar-section-title">🖥 表示モード</h3>
+      <button class="filter-btn active" id="mode-normal" onclick="setViewMode('normal')">📹 動画一覧</button>
+      <button class="filter-btn" id="mode-bullets" onclick="setViewMode('bullets')">📝 箇条書き一覧</button>
+      <button class="filter-btn" id="mode-prompts" onclick="setViewMode('prompts')">📋 プロンプト一覧</button>
+    </div>
+
+    <!-- 進捗サマリー -->
+    <div class="sidebar-section">
+      <h3 class="sidebar-section-title">📊 進捗</h3>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <span class="stat-number" id="stat-total">0</span>
+          <span class="stat-label">登録動画</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number stat-yellow" id="stat-checked">0</span>
+          <span class="stat-label">覚えた</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number stat-green" id="stat-practiced">0</span>
+          <span class="stat-label">実践済み</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number stat-blue" id="stat-important">0</span>
+          <span class="stat-label">重要</span>
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>全体の理解度</span>
+          <span id="progress-pct">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- フィルター -->
+    <div class="sidebar-section">
+      <h3 class="sidebar-section-title">🔽 絞り込み</h3>
+      <button class="filter-btn active" data-filter="all">すべて</button>
+      <button class="filter-btn" data-filter="fav">⭐ お気に入り（★4以上）</button>
+      <button class="filter-btn" data-filter="level-0">🔴 未理解</button>
+      <button class="filter-btn" data-filter="level-1">🟡 覚えた</button>
+      <button class="filter-btn" data-filter="level-2">🟢 実践済み</button>
+      <button class="filter-btn" data-filter="level-3">🔵 重要項目あり</button>
+      <button class="filter-btn" data-filter="review">📅 復習期限近い</button>
+    </div>
+
+    <!-- カテゴリ -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-header">
+        <h3 class="sidebar-section-title">📁 カテゴリ</h3>
+        <button class="icon-btn" id="add-category-btn" title="カテゴリを追加">＋</button>
+      </div>
+      <div id="category-list"></div>
+    </div>
+
+  </aside>
+
+  <!-- メインコンテンツ -->
+  <main class="main-content">
+    <div class="content-header">
+      <h2 class="content-title" id="content-title">すべての動画</h2>
+      <span class="content-count" id="content-count">0本</span>
+      <div class="view-toggle-group" id="view-toggle-group">
+        <button class="view-toggle-btn active" id="vt-grid" onclick="setCardView('grid')" title="カード表示">⊞ カード</button>
+        <button class="view-toggle-btn" id="vt-list" onclick="setCardView('list')" title="リスト表示">☰ リスト</button>
+        <button class="view-toggle-btn memo-on" id="vt-prompt" onclick="togglePromptCol()" title="プロンプト列の表示切替" style="display:none">📋 プロンプト ON</button>
+        <button class="view-toggle-btn" id="vt-memo" onclick="toggleMemoCol()" title="メモ列の表示切替" style="display:none">📝 メモ</button>
+      </div>
+    </div>
+    <div class="video-grid" id="video-grid">
+      <!-- 動画カードがここに入る -->
+    </div>
+    <div class="empty-state" id="empty-state" style="display:none">
+      <p>動画がありません</p>
+      <button class="btn btn-primary" id="empty-add-btn">＋ 動画を追加</button>
+    </div>
+  </main>
+
+</div>
+
+<!-- ========== 動画追加・編集モーダル ========== -->
+<div class="modal-overlay" id="video-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-title">動画を追加</h2>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- YouTube埋め込みプレビュー -->
+      <div id="embed-preview" class="embed-preview" style="display:none">
+        <iframe id="embed-iframe" src="" frameborder="0" allowfullscreen></iframe>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group form-group-2">
+          <label>動画タイトル <span class="required">*</span></label>
+          <input type="text" id="form-title" placeholder="例：Python入門 第1回">
+        </div>
+        <div class="form-group form-group-1">
+          <label>カテゴリ <span class="required">*</span></label>
+          <select id="form-category"></select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>YouTube URL</label>
+        <div class="url-drop-zone" id="url-drop-zone">
+          <div class="url-drop-hint" id="url-drop-hint">🎯 ここにYouTube URLをドロップ</div>
+          <div class="url-row">
+            <input type="url" id="form-url" placeholder="https://www.youtube.com/watch?v=...">
+            <button class="btn btn-ghost btn-sm" id="preview-btn">▶ プレビュー</button>
+          </div>
+          <div class="url-fetch-status" id="url-fetch-status" style="display:none"></div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group form-group-1">
+          <label>お気に入り度</label>
+          <div class="star-selector" id="star-selector">
+            <span class="star" data-val="1">★</span>
+            <span class="star" data-val="2">★</span>
+            <span class="star" data-val="3">★</span>
+            <span class="star" data-val="4">★</span>
+            <span class="star" data-val="5">★</span>
+          </div>
+          <input type="hidden" id="form-stars" value="0">
+        </div>
+        <div class="form-group form-group-1">
+          <label>復習予定日</label>
+          <input type="date" id="form-review-date">
+        </div>
+      </div>
+
+      <!-- 箇条書きセクション -->
+      <div class="form-group">
+        <div class="bullets-header">
+          <label>内容の箇条書き</label>
+          <div class="bullets-actions">
+            <button class="btn btn-ghost btn-sm" id="add-bullet-btn">＋ 項目を追加</button>
+          </div>
+        </div>
+        <div id="bullets-container" class="bullets-container"></div>
+      </div>
+
+      <!-- プロンプト記録 -->
+      <div class="form-group">
+        <div class="bullets-header">
+          <label>📋 プロンプト記録</label>
+          <div class="bullets-actions">
+            <button class="btn btn-ghost btn-sm" id="add-prompt-btn">＋ プロンプトを追加</button>
+          </div>
+        </div>
+        <div id="prompts-container" class="prompts-container"></div>
+      </div>
+
+      <!-- 自由メモ -->
+      <div class="form-group">
+        <label>自由メモ</label>
+        <textarea id="form-memo" rows="3" placeholder="気づいたこと、感想、リンクなど..."></textarea>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="modal-clear" style="margin-right:auto">🗑 内容をクリア</button>
+      <button class="btn btn-ghost" id="modal-cancel">キャンセル</button>
+      <button class="btn btn-primary" id="modal-save">保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 動画詳細モーダル ========== -->
+<div class="modal-overlay" id="detail-modal" style="display:none">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h2 class="modal-title" id="detail-title"></h2>
+      <button class="modal-close" id="detail-close">✕</button>
+    </div>
+    <div class="modal-body" id="detail-body">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="detail-delete">🗑 削除</button>
+      <button class="btn btn-secondary" id="detail-edit">✏ 編集</button>
+      <button class="btn btn-ghost" id="detail-close-btn">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== カテゴリ追加モーダル ========== -->
+<div class="modal-overlay" id="category-modal" style="display:none">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2 class="modal-title">📁 カテゴリを追加</h2>
+      <button class="modal-close" id="cat-modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>カテゴリ名</label>
+        <input type="text" id="new-category-input" placeholder="例：プログラミング基礎">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="cat-cancel">キャンセル</button>
+      <button class="btn btn-primary" id="cat-save">追加</button>
+    </div>
+  </div>
+</div>
+
+<!-- トースト通知 -->
+<div id="toast" class="toast" style="display:none"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
