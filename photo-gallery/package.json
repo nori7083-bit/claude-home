@@ -1,0 +1,17 @@
+{
+  "name": "photo-gallery",
+  "version": "1.0.0",
+  "private": true,
+  "description": "写真フォルダから、Cloudflare Pages に置ける写真一覧ページを作る道具",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "wrangler": "^4.148.0"
+  }
+}
