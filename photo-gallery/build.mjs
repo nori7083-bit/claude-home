@@ -363,10 +363,10 @@ const TEMPLATE = `<!DOCTYPE html>
     padding: 5px 14px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background .15s;
   }
   #slideshow-btn:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
-  #slideshow { display: none; position: fixed; inset: 0; background: #000; z-index: 3000; overflow: hidden; cursor: none; --ss-dur: 6.4s; }
+  #slideshow { display: none; position: fixed; inset: 0; background: #000; z-index: 3000; overflow: hidden; cursor: none; --ss-dur: 2.8s; }
   #slideshow.show { display: block; }
   #slideshow.controls-visible, #slideshow.paused { cursor: default; }
-  .ss-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1.4s ease; }
+  .ss-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.7s ease; }
   .ss-slide.active { opacity: 1; }
   .ss-bg { position: absolute; top: -60px; left: -60px; width: calc(100% + 120px); height: calc(100% + 120px); object-fit: cover; filter: blur(30px) brightness(0.45); }
   .ss-fg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; will-change: transform; }
@@ -578,7 +578,7 @@ const TEMPLATE = `<!DOCTYPE html>
 
   // ---- スライドショー ----
   const MUSIC = __MUSIC__;
-  const SLIDE_MS = 5000;
+  const SLIDE_MS = 2000;
   const slideshow = $('slideshow');
   const ssSlides = slideshow.querySelectorAll('.ss-slide');
   const ssAudio = $('ss-audio');
@@ -626,10 +626,10 @@ const TEMPLATE = `<!DOCTYPE html>
 
     // 毎回、寄るか引くか・動く向きを変えて、単調にならないようにする
     const zoomIn = Math.random() < 0.5;
-    const dx = ((Math.random() * 2 - 1) * 2.5).toFixed(2) + '%';
-    const dy = ((Math.random() * 2 - 1) * 2).toFixed(2) + '%';
-    fg.style.setProperty('--s0', zoomIn ? 1 : 1.12);
-    fg.style.setProperty('--s1', zoomIn ? 1.12 : 1);
+    const dx = ((Math.random() * 2 - 1) * 1.5).toFixed(2) + '%';
+    const dy = ((Math.random() * 2 - 1) * 1.2).toFixed(2) + '%';
+    fg.style.setProperty('--s0', zoomIn ? 1 : 1.06);
+    fg.style.setProperty('--s1', zoomIn ? 1.06 : 1);
     fg.style.setProperty('--x0', zoomIn ? '0%' : dx);
     fg.style.setProperty('--y0', zoomIn ? '0%' : dy);
     fg.style.setProperty('--x1', zoomIn ? dx : '0%');
@@ -643,7 +643,8 @@ const TEMPLATE = `<!DOCTYPE html>
     ssActive = 1 - ssActive;
     ssIndex = i;
     $('ss-counter').textContent = (i + 1) + ' / ' + images.length;
-    new Image().src = images[(i + 1) % images.length].src;
+    // 2秒ごとに切り替わるので、少し先まで読んでおいて待たされないようにする
+    for (let k = 1; k <= 3; k++) new Image().src = images[(i + k) % images.length].src;
     ssSchedule();
   }
 
