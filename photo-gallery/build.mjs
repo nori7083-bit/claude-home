@@ -1,5 +1,5 @@
 // 写真フォルダから、写真一覧ページ（index.html）と縮小した写真を作る。
-// 使い方: node build.mjs <写真フォルダ> --name <サイト名> [--title <ページの題名>] [--date <YYYY-MM-DD>] [--music <曲のファイル>] [--out <出力先>]
+// 使い方: node build.mjs <写真フォルダ> --name <サイト名> [--title <ページの題名>] [--date <YYYY-MM-DD>] [--music <曲のファイル>] [--seconds <1枚の秒数>] [--out <出力先>]
 import { copyFile, readdir, mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { execFile } from 'node:child_process';
@@ -32,11 +32,11 @@ function today() {
 }
 
 export function parseArgs(argv) {
-  const opts = { title: '競技写真', out: 'dist', date: today() };
+  const opts = { title: '競技写真', out: 'dist', date: today(), seconds: 1.5 };
   const rest = [];
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === '--name' || a === '--title' || a === '--out' || a === '--date' || a === '--music') {
+    if (a === '--name' || a === '--title' || a === '--out' || a === '--date' || a === '--music' || a === '--seconds') {
       const value = argv[++i];
       if (value === undefined) throw new Error(`${a} のあとに値を書いてください`);
       opts[a.slice(2)] = value;
@@ -54,6 +54,8 @@ export function parseArgs(argv) {
   if (opts.music && !MUSIC_EXTS.has(path.extname(opts.music).toLowerCase())) {
     throw new Error('--music には mp3・m4a・aac・ogg・wav のどれかの曲を指定してください');
   }
+  opts.seconds = Number(opts.seconds);
+  if (!(opts.seconds >= 0.5 && opts.seconds <= 30)) throw new Error('--seconds は 0.5〜30 の数で書いてください（例: --seconds 1.5）');
   return opts;
 }
 
@@ -166,14 +168,15 @@ async function runPool(items, limit, worker) {
   await Promise.all(runners);
 }
 
-export function renderHtml(title, images, music = null) {
+export function renderHtml(title, images, music = null, seconds = 1.5) {
   const data = JSON.stringify(images).replace(/</g, '\\u003c');
   // 置き換えは関数で渡す。ファイル名に「$」があっても特別な記号として扱われないように
   return TEMPLATE
     .replaceAll('__TITLE__', () => escapeHtml(title))
     .replaceAll('__COUNT__', () => String(images.length))
     .replace('__IMAGES__', () => data)
-    .replace('__MUSIC__', () => JSON.stringify(music));
+    .replace('__MUSIC__', () => JSON.stringify(music))
+    .replace('__SLIDE_MS__', () => String(Math.round(seconds * 1000)));
 }
 
 export function escapeHtml(s) {
@@ -248,7 +251,7 @@ async function main() {
   if (removed) console.log(`外された写真${removed}枚の縮小版を消しました`);
 
   const music = await placeMusic(opts.music, outDir);
-  await writeFile(path.join(outDir, 'index.html'), renderHtml(opts.title, images, music));
+  await writeFile(path.join(outDir, 'index.html'), renderHtml(opts.title, images, music, opts.seconds));
 
   // トップページに並べるため、大会の情報を控えておく
   const events = await readEvents();
@@ -363,10 +366,10 @@ const TEMPLATE = `<!DOCTYPE html>
     padding: 5px 14px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background .15s;
   }
   #slideshow-btn:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
-  #slideshow { display: none; position: fixed; inset: 0; background: #000; z-index: 3000; overflow: hidden; cursor: none; --ss-dur: 2.8s; }
+  #slideshow { display: none; position: fixed; inset: 0; background: #000; z-index: 3000; overflow: hidden; cursor: none; --ss-dur: 2.2s; --ss-fade: 0.6s; }
   #slideshow.show { display: block; }
   #slideshow.controls-visible, #slideshow.paused { cursor: default; }
-  .ss-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.7s ease; }
+  .ss-slide { position: absolute; inset: 0; opacity: 0; transition: opacity var(--ss-fade) ease; }
   .ss-slide.active { opacity: 1; }
   .ss-bg { position: absolute; top: -60px; left: -60px; width: calc(100% + 120px); height: calc(100% + 120px); object-fit: cover; filter: blur(30px) brightness(0.45); }
   .ss-fg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; will-change: transform; }
@@ -578,7 +581,9 @@ const TEMPLATE = `<!DOCTYPE html>
 
   // ---- スライドショー ----
   const MUSIC = __MUSIC__;
-  const SLIDE_MS = 2000;
+  const SLIDE_MS = __SLIDE_MS__;
+  // 切り替えの長さは1枚の時間に合わせる。速いときに重なっている時間ばかりにならないように
+  const FADE_MS = Math.min(1400, Math.round(SLIDE_MS * 0.4));
   const slideshow = $('slideshow');
   const ssSlides = slideshow.querySelectorAll('.ss-slide');
   const ssAudio = $('ss-audio');
@@ -590,6 +595,8 @@ const TEMPLATE = `<!DOCTYPE html>
   let ssPaused = false;
   let ssFade = null;
 
+  slideshow.style.setProperty('--ss-fade', FADE_MS + 'ms');
+  slideshow.style.setProperty('--ss-dur', (SLIDE_MS + FADE_MS) + 'ms');
   if (!MUSIC) $('ss-mute').style.display = 'none';
 
   function loadImage(src) {
@@ -643,8 +650,8 @@ const TEMPLATE = `<!DOCTYPE html>
     ssActive = 1 - ssActive;
     ssIndex = i;
     $('ss-counter').textContent = (i + 1) + ' / ' + images.length;
-    // 2秒ごとに切り替わるので、少し先まで読んでおいて待たされないようにする
-    for (let k = 1; k <= 3; k++) new Image().src = images[(i + k) % images.length].src;
+    // 速く切り替わるので、少し先まで読んでおいて待たされないようにする
+    for (let k = 1; k <= 4; k++) new Image().src = images[(i + k) % images.length].src;
     ssSchedule();
   }
 
