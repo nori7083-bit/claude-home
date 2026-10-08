@@ -119,6 +119,18 @@ async function resizePhoto(sharp, input, fullPath, thumbPath) {
   return full;
 }
 
+export async function removeStale(dirs, keep) {
+  let removed = 0;
+  for (const dir of dirs) {
+    for (const name of await readdir(dir)) {
+      if (keep.has(name)) continue;
+      await rm(path.join(dir, name), { force: true });
+      if (dir === dirs[0]) removed++;
+    }
+  }
+  return removed;
+}
+
 async function readSize(sharp, file) {
   const meta = await sharp(file).metadata();
   return { width: meta.width, height: meta.height };
@@ -211,6 +223,10 @@ async function main() {
     await rm(workDir, { recursive: true, force: true });
   }
   process.stdout.write('\n');
+
+  // 元のフォルダから外した写真の縮小版を消す。残すと公開し直したときにいっしょに送られてしまう
+  const removed = await removeStale([imagesDir, thumbsDir], new Set(names));
+  if (removed) console.log(`外された写真${removed}枚の縮小版を消しました`);
 
   await writeFile(path.join(outDir, 'index.html'), renderHtml(opts.title, images));
 
