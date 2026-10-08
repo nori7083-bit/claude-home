@@ -17,3 +17,4 @@ audio-transcription-supporter/transcripts/*.txt
 
 # 写真ギャラリーの出力（写真が大量に入るのでGitHubにはアップロードしない）
 photo-gallery/dist/
+photo-gallery/events.json

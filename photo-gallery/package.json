@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "node build.mjs",
+    "top": "node top.mjs",
     "test": "node --test"
   },
   "dependencies": {

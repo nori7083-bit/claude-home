@@ -1,10 +1,15 @@
 // 写真フォルダから、写真一覧ページ（index.html）と縮小した写真を作る。
-// 使い方: node build.mjs <写真フォルダ> --name <サイト名> [--title <ページの題名>] [--out <出力先>]
-import { readdir, mkdir, stat, writeFile } from 'node:fs/promises';
+// 使い方: node build.mjs <写真フォルダ> --name <サイト名> [--title <ページの題名>] [--date <YYYY-MM-DD>] [--out <出力先>]
+import { readdir, mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { cpus } from 'node:os';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import { cpus, tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+// 大会の一覧（トップページの材料）。道具のフォルダに置く
+export const EVENTS_FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), 'events.json');
 
 // 大きい写真の長い辺。スマホやパソコンで見るには十分で、1枚あたり数百KBに収まる
 const FULL_LONG_EDGE = 2400;
@@ -12,16 +17,24 @@ const FULL_QUALITY = 82;
 // 一覧の見本は高さ180pxで並べるので、きれいに見えるよう2倍で作る
 const THUMB_HEIGHT = 360;
 const THUMB_QUALITY = 70;
-const PHOTO_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.tif', '.tiff']);
+// iPhone の写真（HEIC）は sharp では読めないので、Mac に最初から入っている sips で JPEG に直してから使う
+const HEIC_EXTS = new Set(['.heic', '.heif']);
+const PHOTO_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.tif', '.tiff', ...HEIC_EXTS]);
 // Cloudflare Pages のプロジェクト名に使える形（英小文字・数字・ハイフン）
-const NAME_PATTERN = /^[a-z0-9][a-z0-9-]{0,56}[a-z0-9]$/;
+export const NAME_PATTERN = /^[a-z0-9][a-z0-9-]{0,56}[a-z0-9]$/;
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+function today() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 export function parseArgs(argv) {
-  const opts = { title: '競技写真', out: 'dist' };
+  const opts = { title: '競技写真', out: 'dist', date: today() };
   const rest = [];
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === '--name' || a === '--title' || a === '--out') {
+    if (a === '--name' || a === '--title' || a === '--out' || a === '--date') {
       const value = argv[++i];
       if (value === undefined) throw new Error(`${a} のあとに値を書いてください`);
       opts[a.slice(2)] = value;
@@ -35,6 +48,7 @@ export function parseArgs(argv) {
   if (!NAME_PATTERN.test(opts.name)) {
     throw new Error('サイト名は英小文字・数字・ハイフンだけで、2〜58文字にしてください（例: 2026-10-kyoto）');
   }
+  if (!DATE_PATTERN.test(opts.date)) throw new Error('--date は 2026-10-04 のような形で書いてください');
   return opts;
 }
 
@@ -70,9 +84,30 @@ async function isUpToDate(srcPath, outPaths) {
   return true;
 }
 
-async function processPhoto(sharp, srcPath, fullPath, thumbPath) {
+const execFileAsync = promisify(execFile);
+
+async function convertHeic(srcPath, workDir) {
+  if (process.platform !== 'darwin') {
+    throw new Error(`HEIC の写真は Mac でだけ変換できます: ${path.basename(srcPath)}`);
+  }
+  const out = path.join(workDir, `${path.basename(srcPath)}.jpg`);
+  await execFileAsync('sips', ['-s', 'format', 'jpeg', '-s', 'formatOptions', '95', srcPath, '--out', out]);
+  return out;
+}
+
+async function processPhoto(sharp, srcPath, fullPath, thumbPath, workDir) {
+  const isHeic = HEIC_EXTS.has(path.extname(srcPath).toLowerCase());
+  const input = isHeic ? await convertHeic(srcPath, workDir) : srcPath;
+  try {
+    return await resizePhoto(sharp, input, fullPath, thumbPath);
+  } finally {
+    if (isHeic) await rm(input, { force: true });
+  }
+}
+
+async function resizePhoto(sharp, input, fullPath, thumbPath) {
   // rotate() はカメラが記録した向きの情報どおりに回す。縦位置の写真が横倒しにならないように
-  const base = sharp(srcPath).rotate();
+  const base = sharp(input).rotate();
   const full = await base.clone()
     .resize(FULL_LONG_EDGE, FULL_LONG_EDGE, { fit: 'inside', withoutEnlargement: true })
     .jpeg({ quality: FULL_QUALITY, mozjpeg: true })
@@ -110,8 +145,22 @@ export function renderHtml(title, images) {
     .replace('__IMAGES__', () => data);
 }
 
-function escapeHtml(s) {
+export function escapeHtml(s) {
   return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+export async function readEvents(file = EVENTS_FILE) {
+  if (!existsSync(file)) return [];
+  return JSON.parse(await readFile(file, 'utf8'));
+}
+
+export async function writeEvents(events, file = EVENTS_FILE) {
+  await writeFile(file, JSON.stringify(events, null, 2) + '\n');
+}
+
+// 同じサイト名の大会は上書きする。作り直したときに一覧で重ならないように
+export function upsertEvent(events, entry) {
+  return [...events.filter(e => e.name !== entry.name), entry];
 }
 
 async function main() {
@@ -131,34 +180,50 @@ async function main() {
   const images = new Array(files.length);
   let done = 0;
   let skipped = 0;
+  const workDir = await mkdtemp(path.join(tmpdir(), 'photo-gallery-'));
 
   console.log(`${files.length}枚の写真を処理します…`);
-  await runPool(files, Math.max(1, cpus().length - 1), async (file, i) => {
-    const srcPath = path.join(srcDir, file);
-    const fullPath = path.join(imagesDir, names[i]);
-    const thumbPath = path.join(thumbsDir, names[i]);
-    let size;
-    // 2回目以降は、変わっていない写真の縮小を飛ばして時間を短くする
-    if (await isUpToDate(srcPath, [fullPath, thumbPath])) {
-      size = await readSize(sharp, fullPath);
-      skipped++;
-    } else {
-      size = await processPhoto(sharp, srcPath, fullPath, thumbPath);
-    }
-    images[i] = {
-      filename: names[i],
-      src: `images/${names[i]}`,
-      thumb: `thumbnails/${names[i]}`,
-      aspect: Math.round((size.width / size.height) * 1000) / 1000,
-    };
-    done++;
-    if (done % 50 === 0 || done === files.length) {
-      process.stdout.write(`\r  ${done} / ${files.length} 枚`);
-    }
-  });
+  try {
+    await runPool(files, Math.max(1, cpus().length - 1), async (file, i) => {
+      const srcPath = path.join(srcDir, file);
+      const fullPath = path.join(imagesDir, names[i]);
+      const thumbPath = path.join(thumbsDir, names[i]);
+      let size;
+      // 2回目以降は、変わっていない写真の縮小を飛ばして時間を短くする
+      if (await isUpToDate(srcPath, [fullPath, thumbPath])) {
+        size = await readSize(sharp, fullPath);
+        skipped++;
+      } else {
+        size = await processPhoto(sharp, srcPath, fullPath, thumbPath, workDir);
+      }
+      images[i] = {
+        filename: names[i],
+        src: `images/${names[i]}`,
+        thumb: `thumbnails/${names[i]}`,
+        aspect: Math.round((size.width / size.height) * 1000) / 1000,
+      };
+      done++;
+      if (done % 50 === 0 || done === files.length) {
+        process.stdout.write(`\r  ${done} / ${files.length} 枚`);
+      }
+    });
+  } finally {
+    await rm(workDir, { recursive: true, force: true });
+  }
   process.stdout.write('\n');
 
   await writeFile(path.join(outDir, 'index.html'), renderHtml(opts.title, images));
+
+  // トップページに並べるため、大会の情報を控えておく
+  const events = await readEvents();
+  await writeEvents(upsertEvent(events, {
+    name: opts.name,
+    title: opts.title,
+    date: opts.date,
+    count: images.length,
+    cover: images[0].thumb,
+    url: events.find(e => e.name === opts.name)?.url ?? `https://${opts.name}.pages.dev`,
+  }));
 
   const relOut = path.relative(process.cwd(), outDir) || '.';
   console.log(`できあがり: ${relOut}/index.html（${files.length}枚${skipped ? `、うち${skipped}枚は前回のものを再利用` : ''}）`);
@@ -423,7 +488,7 @@ const TEMPLATE = `<!DOCTYPE html>
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   main().catch(err => {
-    console.error('エラー: ' + err.message);
+    console.error('\nエラー: ' + err.message);
     process.exit(1);
   });
 }
