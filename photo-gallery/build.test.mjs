@@ -31,4 +31,18 @@ test('renderHtml: 題名とファイル名の特殊な文字がページを壊�
   assert.ok(html.includes('\\u003c/script>$&.jpg'));
   assert.ok(html.includes('全1枚'));
   assert.ok(!html.includes('__IMAGES__'));
+  assert.ok(!html.includes('__COUNT__'));
+  assert.ok(!html.includes('__TITLE__'));
+});
+
+test('renderHtml: 曲があるときだけ曲の名前をページに入れる', () => {
+  const imgs = [{ filename: 'a.jpg', src: 'images/a.jpg', thumb: 'thumbnails/a.jpg', aspect: 1 }];
+  assert.ok(renderHtml('t', imgs, 'music.mp3').includes('const MUSIC = "music.mp3";'));
+  assert.ok(renderHtml('t', imgs).includes('const MUSIC = null;'));
+  assert.ok(!renderHtml('t', imgs).includes('__MUSIC__'));
+});
+
+test('parseArgs: 曲は決まった形式だけ受け付ける', () => {
+  assert.equal(parseArgs(['p', '--name', 'ab', '--music', 'song.MP3']).music, 'song.MP3');
+  assert.throws(() => parseArgs(['p', '--name', 'ab', '--music', 'song.mid']));
 });

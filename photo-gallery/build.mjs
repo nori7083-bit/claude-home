@@ -1,6 +1,6 @@
 // 写真フォルダから、写真一覧ページ（index.html）と縮小した写真を作る。
-// 使い方: node build.mjs <写真フォルダ> --name <サイト名> [--title <ページの題名>] [--date <YYYY-MM-DD>] [--out <出力先>]
-import { readdir, mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
+// 使い方: node build.mjs <写真フォルダ> --name <サイト名> [--title <ページの題名>] [--date <YYYY-MM-DD>] [--music <曲のファイル>] [--out <出力先>]
+import { copyFile, readdir, mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -23,6 +23,8 @@ const PHOTO_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.tif', '.tiff', .
 // Cloudflare Pages のプロジェクト名に使える形（英小文字・数字・ハイフン）
 export const NAME_PATTERN = /^[a-z0-9][a-z0-9-]{0,56}[a-z0-9]$/;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+// スライドショーで流せる曲の形式（どのブラウザでも鳴りやすいもの）
+const MUSIC_EXTS = new Set(['.mp3', '.m4a', '.aac', '.ogg', '.wav']);
 
 function today() {
   const d = new Date();
@@ -34,7 +36,7 @@ export function parseArgs(argv) {
   const rest = [];
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === '--name' || a === '--title' || a === '--out' || a === '--date') {
+    if (a === '--name' || a === '--title' || a === '--out' || a === '--date' || a === '--music') {
       const value = argv[++i];
       if (value === undefined) throw new Error(`${a} のあとに値を書いてください`);
       opts[a.slice(2)] = value;
@@ -49,6 +51,9 @@ export function parseArgs(argv) {
     throw new Error('サイト名は英小文字・数字・ハイフンだけで、2〜58文字にしてください（例: 2026-10-kyoto）');
   }
   if (!DATE_PATTERN.test(opts.date)) throw new Error('--date は 2026-10-04 のような形で書いてください');
+  if (opts.music && !MUSIC_EXTS.has(path.extname(opts.music).toLowerCase())) {
+    throw new Error('--music には mp3・m4a・aac・ogg・wav のどれかの曲を指定してください');
+  }
   return opts;
 }
 
@@ -131,6 +136,19 @@ export async function removeStale(dirs, keep) {
   return removed;
 }
 
+// 曲は music.mp3 のような名前で、ページと同じ場所に置く。前に入れた曲は消して入れ替える
+async function placeMusic(src, outDir) {
+  for (const name of await readdir(outDir)) {
+    if (/^music\.[a-z0-9]+$/i.test(name)) await rm(path.join(outDir, name), { force: true });
+  }
+  if (!src) return null;
+  const srcPath = path.resolve(src);
+  if (!existsSync(srcPath)) throw new Error(`曲のファイルが見つかりませんでした: ${srcPath}`);
+  const name = `music${path.extname(srcPath).toLowerCase()}`;
+  await copyFile(srcPath, path.join(outDir, name));
+  return name;
+}
+
 async function readSize(sharp, file) {
   const meta = await sharp(file).metadata();
   return { width: meta.width, height: meta.height };
@@ -148,13 +166,14 @@ async function runPool(items, limit, worker) {
   await Promise.all(runners);
 }
 
-export function renderHtml(title, images) {
+export function renderHtml(title, images, music = null) {
   const data = JSON.stringify(images).replace(/</g, '\\u003c');
   // 置き換えは関数で渡す。ファイル名に「$」があっても特別な記号として扱われないように
   return TEMPLATE
     .replaceAll('__TITLE__', () => escapeHtml(title))
-    .replace('__COUNT__', () => String(images.length))
-    .replace('__IMAGES__', () => data);
+    .replaceAll('__COUNT__', () => String(images.length))
+    .replace('__IMAGES__', () => data)
+    .replace('__MUSIC__', () => JSON.stringify(music));
 }
 
 export function escapeHtml(s) {
@@ -228,7 +247,8 @@ async function main() {
   const removed = await removeStale([imagesDir, thumbsDir], new Set(names));
   if (removed) console.log(`外された写真${removed}枚の縮小版を消しました`);
 
-  await writeFile(path.join(outDir, 'index.html'), renderHtml(opts.title, images));
+  const music = await placeMusic(opts.music, outDir);
+  await writeFile(path.join(outDir, 'index.html'), renderHtml(opts.title, images, music));
 
   // トップページに並べるため、大会の情報を控えておく
   const events = await readEvents();
@@ -335,6 +355,49 @@ const TEMPLATE = `<!DOCTYPE html>
   #prev-btn { left: 0; border-radius: 0 8px 8px 0; }
   #next-btn { right: 0; border-radius: 8px 0 0 8px; }
 
+
+  /* スライドショー：写真をゆっくり動かしながら、ふわっと切り替えて自動で流す */
+  .subtitle { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  #slideshow-btn {
+    background: var(--primary); color: #fff; border: 1px solid var(--primary); border-radius: 100px;
+    padding: 5px 14px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background .15s;
+  }
+  #slideshow-btn:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+  #slideshow { display: none; position: fixed; inset: 0; background: #000; z-index: 3000; overflow: hidden; cursor: none; --ss-dur: 6.4s; }
+  #slideshow.show { display: block; }
+  #slideshow.controls-visible, #slideshow.paused { cursor: default; }
+  .ss-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1.4s ease; }
+  .ss-slide.active { opacity: 1; }
+  .ss-bg { position: absolute; top: -60px; left: -60px; width: calc(100% + 120px); height: calc(100% + 120px); object-fit: cover; filter: blur(30px) brightness(0.45); }
+  .ss-fg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; will-change: transform; }
+  .ss-slide.kb .ss-fg { animation: ss-kenburns var(--ss-dur) ease-out forwards; }
+  @keyframes ss-kenburns {
+    from { transform: scale(var(--s0)) translate(var(--x0), var(--y0)); }
+    to { transform: scale(var(--s1)) translate(var(--x1), var(--y1)); }
+  }
+  #slideshow.paused .ss-fg { animation-play-state: paused; }
+  .ss-intro {
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #fff; text-align: center; padding: 24px; z-index: 2; pointer-events: none; opacity: 0;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,.55), rgba(0,0,0,0) 70%);
+  }
+  .ss-intro.play { animation: ss-intro 4.2s ease forwards; }
+  .ss-intro-title { font-size: clamp(1.4rem, 4vw, 2.6rem); font-weight: 800; letter-spacing: .04em; text-shadow: 0 2px 18px rgba(0,0,0,.6); }
+  .ss-intro-sub { margin-top: 8px; font-size: 14px; opacity: .85; }
+  @keyframes ss-intro { 0% { opacity: 0; transform: translateY(8px); } 20%, 70% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+  .ss-controls {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; display: flex; align-items: center; gap: 12px;
+    padding: 28px 20px calc(18px + env(safe-area-inset-bottom)); color: #fff;
+    background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,.65)); opacity: 0; transition: opacity .4s;
+  }
+  #slideshow.controls-visible .ss-controls, #slideshow.paused .ss-controls { opacity: 1; }
+  .ss-btn {
+    width: 46px; height: 46px; border-radius: 50%; border: 0; cursor: pointer; font-size: 17px; color: #fff;
+    background: rgba(255,255,255,.16); display: flex; align-items: center; justify-content: center; transition: background .15s;
+  }
+  .ss-btn:hover { background: rgba(255,255,255,.3); }
+  .ss-counter { margin-left: auto; font-size: 13px; opacity: .85; font-variant-numeric: tabular-nums; }
+
   @media (max-width: 800px) {
     .gallery-item { height: 120px; }
     .nav-btn { font-size: 26px; width: 40px; }
@@ -344,7 +407,7 @@ const TEMPLATE = `<!DOCTYPE html>
 </head>
 <body>
   <h1>__TITLE__</h1>
-  <div class="subtitle">全__COUNT__枚</div>
+  <div class="subtitle"><span>全__COUNT__枚</span><button id="slideshow-btn" type="button">▶ スライドショーで見る</button></div>
 
   <div class="pagination">
     <button id="btn-prev-top">＜ 前のページ</button>
@@ -372,6 +435,24 @@ const TEMPLATE = `<!DOCTYPE html>
     <img id="modal-img" src="" alt="">
     <div class="nav-btn" id="next-btn">&#10095;</div>
     <div id="modal-loading">読み込み中…</div>
+  </div>
+
+  <div id="slideshow" aria-label="スライドショー">
+    <div class="ss-slide"><img class="ss-bg" alt=""><img class="ss-fg" alt=""></div>
+    <div class="ss-slide"><img class="ss-bg" alt=""><img class="ss-fg" alt=""></div>
+    <div class="ss-intro" id="ss-intro">
+      <div class="ss-intro-title">__TITLE__</div>
+      <div class="ss-intro-sub">全__COUNT__枚</div>
+    </div>
+    <div class="ss-controls">
+      <button class="ss-btn" id="ss-prev" type="button" title="前の写真">&#10094;</button>
+      <button class="ss-btn" id="ss-pause" type="button" title="一時停止">❚❚</button>
+      <button class="ss-btn" id="ss-next" type="button" title="次の写真">&#10095;</button>
+      <button class="ss-btn" id="ss-mute" type="button" title="音を消す">🔊</button>
+      <span class="ss-counter" id="ss-counter"></span>
+      <button class="ss-btn" id="ss-close" type="button" title="終わる">✕</button>
+    </div>
+    <audio id="ss-audio" loop preload="none"></audio>
   </div>
 
 <script>
@@ -493,6 +574,165 @@ const TEMPLATE = `<!DOCTYPE html>
     if (e.key === 'ArrowRight') step(1);
     if (e.key === 'ArrowLeft') step(-1);
     if (e.key === 'Escape') closeModal();
+  });
+
+  // ---- スライドショー ----
+  const MUSIC = __MUSIC__;
+  const SLIDE_MS = 5000;
+  const slideshow = $('slideshow');
+  const ssSlides = slideshow.querySelectorAll('.ss-slide');
+  const ssAudio = $('ss-audio');
+  let ssIndex = 0;
+  let ssActive = 0;
+  let ssTimer = null;
+  let ssHideTimer = null;
+  let ssToken = 0;
+  let ssPaused = false;
+  let ssFade = null;
+
+  if (!MUSIC) $('ss-mute').style.display = 'none';
+
+  function loadImage(src) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = src;
+    });
+  }
+
+  // 音をいきなり鳴らしたり止めたりせず、ゆっくり大きく・小さくする
+  function fadeAudio(to, ms, done) {
+    clearInterval(ssFade);
+    const from = ssAudio.volume;
+    const started = Date.now();
+    ssFade = setInterval(() => {
+      const t = Math.min(1, (Date.now() - started) / ms);
+      ssAudio.volume = from + (to - from) * t;
+      if (t === 1) { clearInterval(ssFade); if (done) done(); }
+    }, 50);
+  }
+
+  async function ssShow(i) {
+    const token = ++ssToken;
+    const item = images[i];
+    const ok = await loadImage(item.src);
+    if (token !== ssToken || !slideshow.classList.contains('show')) return;
+
+    const next = ssSlides[1 - ssActive];
+    const fg = next.querySelector('.ss-fg');
+    next.querySelector('.ss-bg').src = item.thumb;
+    fg.src = ok ? item.src : item.thumb;
+
+    // 毎回、寄るか引くか・動く向きを変えて、単調にならないようにする
+    const zoomIn = Math.random() < 0.5;
+    const dx = ((Math.random() * 2 - 1) * 2.5).toFixed(2) + '%';
+    const dy = ((Math.random() * 2 - 1) * 2).toFixed(2) + '%';
+    fg.style.setProperty('--s0', zoomIn ? 1 : 1.12);
+    fg.style.setProperty('--s1', zoomIn ? 1.12 : 1);
+    fg.style.setProperty('--x0', zoomIn ? '0%' : dx);
+    fg.style.setProperty('--y0', zoomIn ? '0%' : dy);
+    fg.style.setProperty('--x1', zoomIn ? dx : '0%');
+    fg.style.setProperty('--y1', zoomIn ? dy : '0%');
+    next.classList.remove('kb');
+    void next.offsetWidth;
+    next.classList.add('kb');
+
+    next.classList.add('active');
+    ssSlides[ssActive].classList.remove('active');
+    ssActive = 1 - ssActive;
+    ssIndex = i;
+    $('ss-counter').textContent = (i + 1) + ' / ' + images.length;
+    new Image().src = images[(i + 1) % images.length].src;
+    ssSchedule();
+  }
+
+  function ssSchedule() {
+    clearTimeout(ssTimer);
+    if (!ssPaused) ssTimer = setTimeout(() => ssShow((ssIndex + 1) % images.length), SLIDE_MS);
+  }
+
+  function ssStep(delta) {
+    ssShow((ssIndex + delta + images.length) % images.length);
+    ssRevealControls();
+  }
+
+  function ssSetPaused(paused) {
+    ssPaused = paused;
+    slideshow.classList.toggle('paused', paused);
+    $('ss-pause').textContent = paused ? '▶' : '❚❚';
+    $('ss-pause').title = paused ? '再生' : '一時停止';
+    if (MUSIC) {
+      if (paused) fadeAudio(0, 400, () => ssAudio.pause());
+      else if (!ssAudio.muted) { ssAudio.play().catch(() => {}); fadeAudio(1, 800); }
+    }
+    if (paused) clearTimeout(ssTimer); else ssSchedule();
+  }
+
+  function ssRevealControls() {
+    slideshow.classList.add('controls-visible');
+    clearTimeout(ssHideTimer);
+    ssHideTimer = setTimeout(() => slideshow.classList.remove('controls-visible'), 2500);
+  }
+
+  function openSlideshow(start) {
+    ssPaused = false;
+    slideshow.classList.remove('paused');
+    $('ss-pause').textContent = '❚❚';
+    ssSlides.forEach(sl => sl.classList.remove('active', 'kb'));
+    slideshow.classList.add('show');
+    document.body.style.overflow = 'hidden';
+    if (slideshow.requestFullscreen) slideshow.requestFullscreen().catch(() => {});
+
+    const intro = $('ss-intro');
+    intro.classList.remove('play');
+    void intro.offsetWidth;
+    intro.classList.add('play');
+
+    if (MUSIC) {
+      if (!ssAudio.getAttribute('src')) ssAudio.src = MUSIC;
+      ssAudio.currentTime = 0;
+      ssAudio.volume = 0;
+      ssAudio.play().catch(() => {});
+      fadeAudio(1, 2000);
+    }
+    ssShow(start);
+  }
+
+  function closeSlideshow() {
+    ssToken++;
+    clearTimeout(ssTimer);
+    clearTimeout(ssHideTimer);
+    if (MUSIC) fadeAudio(0, 500, () => ssAudio.pause());
+    if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+    slideshow.classList.remove('show', 'controls-visible');
+    document.body.style.overflow = '';
+  }
+
+  $('slideshow-btn').onclick = () => openSlideshow(0);
+  $('ss-close').onclick = closeSlideshow;
+  $('ss-pause').onclick = () => { ssSetPaused(!ssPaused); ssRevealControls(); };
+  $('ss-next').onclick = () => ssStep(1);
+  $('ss-prev').onclick = () => ssStep(-1);
+  $('ss-mute').onclick = () => {
+    ssAudio.muted = !ssAudio.muted;
+    $('ss-mute').textContent = ssAudio.muted ? '🔇' : '🔊';
+    $('ss-mute').title = ssAudio.muted ? '音を出す' : '音を消す';
+    if (!ssAudio.muted && !ssPaused) { ssAudio.play().catch(() => {}); fadeAudio(1, 600); }
+    ssRevealControls();
+  };
+  // 全画面を Esc などで抜けたら、スライドショーも終わる
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && slideshow.classList.contains('show')) closeSlideshow();
+  });
+  slideshow.addEventListener('mousemove', ssRevealControls);
+  slideshow.addEventListener('touchstart', ssRevealControls, { passive: true });
+  document.addEventListener('keydown', e => {
+    if (!slideshow.classList.contains('show')) return;
+    if (e.key === ' ') { e.preventDefault(); ssSetPaused(!ssPaused); ssRevealControls(); }
+    if (e.key === 'ArrowRight') ssStep(1);
+    if (e.key === 'ArrowLeft') ssStep(-1);
+    if (e.key === 'Escape') closeSlideshow();
   });
 
   initPagination();
