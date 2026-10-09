@@ -400,6 +400,20 @@ const TEMPLATE = `<!DOCTYPE html>
   }
   .ss-btn:hover { background: rgba(255,255,255,.3); }
   .ss-counter { margin-left: auto; font-size: 13px; opacity: .85; font-variant-numeric: tabular-nums; }
+  .ss-speed { display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 100px; background: rgba(255,255,255,.14); }
+  .ss-speed-label { font-size: 12px; opacity: .8; padding: 0 6px 0 8px; }
+  .ss-speed button {
+    border: 0; border-radius: 100px; padding: 7px 11px; font-size: 13px; font-weight: 700; cursor: pointer;
+    color: #fff; background: transparent; font-variant-numeric: tabular-nums; transition: background .15s, color .15s;
+  }
+  .ss-speed button:hover { background: rgba(255,255,255,.18); }
+  .ss-speed button.on { background: #fff; color: #111; }
+  @media (max-width: 600px) {
+    .ss-controls { flex-wrap: wrap; gap: 8px; }
+    .ss-btn { width: 40px; height: 40px; font-size: 15px; }
+    .ss-speed { order: -1; width: 100%; justify-content: center; background: none; }
+    .ss-speed button { background: rgba(255,255,255,.14); }
+  }
 
   @media (max-width: 800px) {
     .gallery-item { height: 120px; }
@@ -452,6 +466,13 @@ const TEMPLATE = `<!DOCTYPE html>
       <button class="ss-btn" id="ss-pause" type="button" title="一時停止">❚❚</button>
       <button class="ss-btn" id="ss-next" type="button" title="次の写真">&#10095;</button>
       <button class="ss-btn" id="ss-mute" type="button" title="音を消す">🔊</button>
+      <div class="ss-speed" id="ss-speed" role="group" aria-label="切り替えの速さ">
+        <span class="ss-speed-label">1枚</span>
+        <button type="button" data-ms="1000">1秒</button>
+        <button type="button" data-ms="1500">1.5秒</button>
+        <button type="button" data-ms="2000">2秒</button>
+        <button type="button" data-ms="3000">3秒</button>
+      </div>
       <span class="ss-counter" id="ss-counter"></span>
       <button class="ss-btn" id="ss-close" type="button" title="終わる">✕</button>
     </div>
@@ -581,9 +602,13 @@ const TEMPLATE = `<!DOCTYPE html>
 
   // ---- スライドショー ----
   const MUSIC = __MUSIC__;
-  const SLIDE_MS = __SLIDE_MS__;
-  // 切り替えの長さは1枚の時間に合わせる。速いときに重なっている時間ばかりにならないように
-  const FADE_MS = Math.min(1400, Math.round(SLIDE_MS * 0.4));
+  const SPEED_KEY = 'gallery-slide-ms';
+  let SLIDE_MS = __SLIDE_MS__;
+  // 見ている人が前に選んだ速さがあれば、それを使う（この人のブラウザの中だけに覚える）
+  try {
+    const saved = parseInt(localStorage.getItem(SPEED_KEY), 10);
+    if (saved >= 500 && saved <= 30000) SLIDE_MS = saved;
+  } catch (e) {}
   const slideshow = $('slideshow');
   const ssSlides = slideshow.querySelectorAll('.ss-slide');
   const ssAudio = $('ss-audio');
@@ -595,8 +620,23 @@ const TEMPLATE = `<!DOCTYPE html>
   let ssPaused = false;
   let ssFade = null;
 
-  slideshow.style.setProperty('--ss-fade', FADE_MS + 'ms');
-  slideshow.style.setProperty('--ss-dur', (SLIDE_MS + FADE_MS) + 'ms');
+  // 切り替えの長さは1枚の時間に合わせる。速いときに重なっている時間ばかりにならないように
+  function applySpeed(ms) {
+    SLIDE_MS = ms;
+    const fade = Math.min(1400, Math.round(ms * 0.4));
+    slideshow.style.setProperty('--ss-fade', fade + 'ms');
+    slideshow.style.setProperty('--ss-dur', (ms + fade) + 'ms');
+    $('ss-speed').querySelectorAll('button').forEach(b => b.classList.toggle('on', Number(b.dataset.ms) === ms));
+  }
+  applySpeed(SLIDE_MS);
+  $('ss-speed').querySelectorAll('button').forEach(b => {
+    b.onclick = () => {
+      applySpeed(Number(b.dataset.ms));
+      try { localStorage.setItem(SPEED_KEY, String(SLIDE_MS)); } catch (e) {}
+      ssSchedule();
+      ssRevealControls();
+    };
+  });
   if (!MUSIC) $('ss-mute').style.display = 'none';
 
   function loadImage(src) {

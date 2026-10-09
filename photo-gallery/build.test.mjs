@@ -53,5 +53,5 @@ test('秒数: 書かなければ1.5秒、ページには ミリ秒で入る', ()
   assert.throws(() => parseArgs(['p', '--name', 'ab', '--seconds', 'abc']));
   assert.throws(() => parseArgs(['p', '--name', 'ab', '--seconds', '0.1']));
   const imgs = [{ filename: 'a.jpg', src: 'images/a.jpg', thumb: 'thumbnails/a.jpg', aspect: 1 }];
-  assert.ok(renderHtml('t', imgs, null, 1.5).includes('const SLIDE_MS = 1500;'));
+  assert.ok(renderHtml('t', imgs, null, 1.5).includes('let SLIDE_MS = 1500;'));
 });
