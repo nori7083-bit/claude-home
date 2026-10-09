@@ -81,7 +81,7 @@ npm run top -- --name nori-photos --title "大会写真ギャラリー"
 ```
 最後に出る「公開するには…」の1行を貼り付ければ、`https://nori-photos.pages.dev` に公開されます。
 
-- 大会の一覧は、このフォルダの `events.json` に自動で記録されます。**道具を新しい版に入れ替えるときは、`events.json` と `dist` フォルダを消さずに残してください。**
+- 大会の一覧は、このフォルダの `events.json` に自動で記録されます。トップページの住所と題名は `gallery.json` に記録され、大会ページのいちばん上に「← （トップページの題名）に戻る」ボタンが付きます。**道具を新しい版に入れ替えるときは、`events.json`・`gallery.json`・`dist` フォルダを消さずに残してください。**
 - 一覧から大会を外すには：`npm run top -- --name nori-photos --remove 2026-10-kyoto`
 - 公開した住所が `https://2026-10-kyoto-abc.pages.dev` のように名前と違っていたときは、`events.json` の `"url"` をその住所に直してから作り直してください。
 

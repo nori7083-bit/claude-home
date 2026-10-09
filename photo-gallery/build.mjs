@@ -10,6 +10,8 @@ import { fileURLToPath } from 'node:url';
 
 // 大会の一覧（トップページの材料）。道具のフォルダに置く
 export const EVENTS_FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), 'events.json');
+// トップページの住所と題名。大会ページの「戻る」ボタンに使う（トップページを作ると記録される）
+export const SITE_FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), 'gallery.json');
 
 // 大きい写真の長い辺。スマホやパソコンで見るには十分で、1枚あたり数百KBに収まる
 const FULL_LONG_EDGE = 2400;
@@ -168,7 +170,7 @@ async function runPool(items, limit, worker) {
   await Promise.all(runners);
 }
 
-export function renderHtml(title, images, music = null, seconds = 1.5) {
+export function renderHtml(title, images, music = null, seconds = 1.5, back = null) {
   const data = JSON.stringify(images).replace(/</g, '\\u003c');
   // 置き換えは関数で渡す。ファイル名に「$」があっても特別な記号として扱われないように
   return TEMPLATE
@@ -176,7 +178,10 @@ export function renderHtml(title, images, music = null, seconds = 1.5) {
     .replaceAll('__COUNT__', () => String(images.length))
     .replace('__IMAGES__', () => data)
     .replace('__MUSIC__', () => JSON.stringify(music))
-    .replace('__SLIDE_MS__', () => String(Math.round(seconds * 1000)));
+    .replace('__SLIDE_MS__', () => String(Math.round(seconds * 1000)))
+    .replace('__BACK__', () => back
+      ? `<div class="back-link"><a href="${escapeHtml(back.url)}">← ${escapeHtml(back.title)}に戻る</a></div>`
+      : '');
 }
 
 export function escapeHtml(s) {
@@ -186,6 +191,15 @@ export function escapeHtml(s) {
 export async function readEvents(file = EVENTS_FILE) {
   if (!existsSync(file)) return [];
   return JSON.parse(await readFile(file, 'utf8'));
+}
+
+export async function readSite(file = SITE_FILE) {
+  if (!existsSync(file)) return null;
+  return JSON.parse(await readFile(file, 'utf8'));
+}
+
+export async function writeSite(site, file = SITE_FILE) {
+  await writeFile(file, JSON.stringify(site, null, 2) + '\n');
 }
 
 export async function writeEvents(events, file = EVENTS_FILE) {
@@ -251,7 +265,7 @@ async function main() {
   if (removed) console.log(`外された写真${removed}枚の縮小版を消しました`);
 
   const music = await placeMusic(opts.music, outDir);
-  await writeFile(path.join(outDir, 'index.html'), renderHtml(opts.title, images, music, opts.seconds));
+  await writeFile(path.join(outDir, 'index.html'), renderHtml(opts.title, images, music, opts.seconds, await readSite()));
 
   // トップページに並べるため、大会の情報を控えておく
   const events = await readEvents();
@@ -292,6 +306,12 @@ const TEMPLATE = `<!DOCTYPE html>
     max-width: 1400px; margin: 0 auto 4px; font-size: 1.2rem; font-weight: 800;
     border-left: 4px solid var(--primary); padding-left: 12px; line-height: 1.35;
   }
+  .back-link { max-width: 1400px; margin: 0 auto 14px; }
+  .back-link a {
+    display: inline-block; background-color: var(--bg-blue); color: var(--primary-dark); border: 1px solid #c7d2fe;
+    padding: 6px 14px; border-radius: 100px; text-decoration: none; font-size: 0.8125rem; font-weight: 700; transition: all .15s;
+  }
+  .back-link a:hover { background-color: var(--primary); color: #fff; border-color: var(--primary); }
   .subtitle { max-width: 1400px; margin: 0 auto 14px; padding-left: 16px; font-size: 0.8125rem; color: var(--text-light); }
 
   .pagination { text-align: center; margin: 18px 0; display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -423,6 +443,7 @@ const TEMPLATE = `<!DOCTYPE html>
 </style>
 </head>
 <body>
+  __BACK__
   <h1>__TITLE__</h1>
   <div class="subtitle"><span>全__COUNT__枚</span><button id="slideshow-btn" type="button">▶ スライドショーで見る</button></div>
 

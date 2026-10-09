@@ -55,3 +55,11 @@ test('秒数: 書かなければ1.5秒、ページには ミリ秒で入る', ()
   const imgs = [{ filename: 'a.jpg', src: 'images/a.jpg', thumb: 'thumbnails/a.jpg', aspect: 1 }];
   assert.ok(renderHtml('t', imgs, null, 1.5).includes('let SLIDE_MS = 1500;'));
 });
+
+test('renderHtml: トップページの記録があれば「戻る」ボタンを付ける', () => {
+  const imgs = [{ filename: 'a.jpg', src: 'images/a.jpg', thumb: 'thumbnails/a.jpg', aspect: 1 }];
+  const html = renderHtml('t', imgs, null, 1.5, { url: 'https://nori-photos.pages.dev', title: '大会<写真>' });
+  assert.ok(html.includes('<a href="https://nori-photos.pages.dev">← 大会&lt;写真&gt;に戻る</a>'));
+  const none = renderHtml('t', imgs);
+  assert.ok(!none.includes('back-link"><a') && !none.includes('__BACK__'));
+});

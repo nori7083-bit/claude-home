@@ -3,7 +3,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { NAME_PATTERN, escapeHtml, readEvents, writeEvents } from './build.mjs';
+import { NAME_PATTERN, escapeHtml, readEvents, readSite, writeEvents, writeSite } from './build.mjs';
 
 export function parseTopArgs(argv) {
   const opts = { title: '写真ギャラリー', out: 'dist', remove: [] };
@@ -62,6 +62,14 @@ async function main() {
     await writeEvents(events);
     console.log(`一覧から外しました: ${opts.remove.join(', ')}`);
   }
+
+  // 大会ページの「戻る」ボタンのために、トップページの住所と題名を控えておく
+  const site = await readSite();
+  await writeSite({
+    name: opts.name,
+    title: opts.title,
+    url: site?.name === opts.name && site.url ? site.url : `https://${opts.name}.pages.dev`,
+  });
 
   const outDir = path.resolve(opts.out, opts.name);
   await mkdir(outDir, { recursive: true });
