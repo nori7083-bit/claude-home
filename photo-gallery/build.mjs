@@ -370,6 +370,20 @@ const TEMPLATE = `<!DOCTYPE html>
     background: rgba(255,255,255,.16); display: flex; align-items: center; justify-content: center; transition: background .15s;
   }
   .ss-btn:hover { background: rgba(255,255,255,.3); }
+  .ss-btn.on { background: #fff; color: #111; }
+  /* 1巡して止まったときの案内 */
+  .ss-end {
+    position: absolute; inset: 0; z-index: 2; display: none; flex-direction: column; align-items: center; justify-content: center;
+    gap: 14px; color: #fff; text-align: center; padding: 24px; background: rgba(0,0,0,.45);
+  }
+  #slideshow.ended .ss-end { display: flex; }
+  .ss-end-title { font-size: clamp(1.2rem, 3.5vw, 1.8rem); font-weight: 800; }
+  .ss-end-buttons { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .ss-end-buttons button {
+    border: 0; border-radius: 100px; padding: 12px 24px; font-size: 15px; font-weight: 800; cursor: pointer;
+  }
+  #ss-again { background: #fff; color: #111; }
+  #ss-end-close { background: rgba(255,255,255,.18); color: #fff; }
   .ss-counter { margin-left: auto; font-size: 13px; opacity: .85; font-variant-numeric: tabular-nums; }
   .ss-speed { display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 100px; background: rgba(255,255,255,.14); }
   .ss-speed-label { font-size: 12px; opacity: .8; padding: 0 6px 0 8px; }
@@ -409,10 +423,18 @@ const TEMPLATE = `<!DOCTYPE html>
       <div class="ss-intro-title">__TITLE__</div>
       <div class="ss-intro-sub">全__COUNT__枚</div>
     </div>
+    <div class="ss-end">
+      <div class="ss-end-title">最後まで見ました</div>
+      <div class="ss-end-buttons">
+        <button type="button" id="ss-again">↻ もう一度見る</button>
+        <button type="button" id="ss-end-close">表紙に戻る</button>
+      </div>
+    </div>
     <div class="ss-controls">
       <button class="ss-btn" id="ss-prev" type="button" title="前の写真">&#10094;</button>
       <button class="ss-btn" id="ss-pause" type="button" title="一時停止">❚❚</button>
       <button class="ss-btn" id="ss-next" type="button" title="次の写真">&#10095;</button>
+      <button class="ss-btn" id="ss-repeat" type="button" title="くり返し再生：オフ" aria-pressed="false">🔁</button>
       <button class="ss-btn" id="ss-mute" type="button" title="音を消す">🔊</button>
       <div class="ss-speed" id="ss-speed" role="group" aria-label="切り替えの速さ">
         <span class="ss-speed-label">1枚</span>
@@ -471,6 +493,9 @@ const TEMPLATE = `<!DOCTYPE html>
   let ssToken = 0;
   let ssPaused = false;
   let ssFade = null;
+  // 最初は1巡したら止まる。🔁 を押すと、止めるまでくり返す
+  let ssRepeat = false;
+  let ssEnded = false;
 
   // 切り替えの長さは1枚の時間に合わせる。速いときに重なっている時間ばかりにならないように
   function applySpeed(ms) {
@@ -549,15 +574,35 @@ const TEMPLATE = `<!DOCTYPE html>
 
   function ssSchedule() {
     clearTimeout(ssTimer);
-    if (!ssPaused) ssTimer = setTimeout(() => ssShow((ssIndex + 1) % images.length), SLIDE_MS);
+    if (ssPaused) return;
+    ssTimer = setTimeout(() => {
+      if (ssIndex === images.length - 1 && !ssRepeat) ssFinish();
+      else ssShow((ssIndex + 1) % images.length);
+    }, SLIDE_MS);
   }
 
   function ssStep(delta) {
+    if (ssEnded) { ssEnded = false; slideshow.classList.remove('ended'); }
     ssShow((ssIndex + delta + images.length) % images.length);
     ssRevealControls();
   }
 
-  function ssSetPaused(paused) {
+  function ssFinish() {
+    ssSetPaused(true);
+    ssEnded = true;
+    slideshow.classList.add('ended');
+  }
+
+  function ssRestart() {
+    ssEnded = false;
+    slideshow.classList.remove('ended');
+    if (MUSIC) ssAudio.currentTime = 0;
+    ssSetPaused(false, true);
+    ssShow(0);
+  }
+
+  function ssSetPaused(paused, skipSchedule) {
+    if (!paused && ssEnded) { ssRestart(); return; }
     ssPaused = paused;
     slideshow.classList.toggle('paused', paused);
     $('ss-pause').textContent = paused ? '▶' : '❚❚';
@@ -566,7 +611,7 @@ const TEMPLATE = `<!DOCTYPE html>
       if (paused) fadeAudio(0, 400, () => ssAudio.pause());
       else if (!ssAudio.muted) { ssAudio.play().catch(() => {}); fadeAudio(1, 800); }
     }
-    if (paused) clearTimeout(ssTimer); else ssSchedule();
+    if (paused) clearTimeout(ssTimer); else if (!skipSchedule) ssSchedule();
   }
 
   function ssRevealControls() {
@@ -577,6 +622,8 @@ const TEMPLATE = `<!DOCTYPE html>
 
   function openSlideshow(start) {
     ssPaused = false;
+    ssEnded = false;
+    slideshow.classList.remove('ended');
     slideshow.classList.remove('paused');
     $('ss-pause').textContent = '❚❚';
     ssSlides.forEach(sl => sl.classList.remove('active', 'kb'));
@@ -612,6 +659,15 @@ const TEMPLATE = `<!DOCTYPE html>
   $('hero-play').onclick = () => openSlideshow(0);
   if (MUSIC) $('hero-note').textContent = '♪ 音楽が流れます';
   $('ss-close').onclick = closeSlideshow;
+  $('ss-end-close').onclick = closeSlideshow;
+  $('ss-again').onclick = ssRestart;
+  $('ss-repeat').onclick = () => {
+    ssRepeat = !ssRepeat;
+    $('ss-repeat').classList.toggle('on', ssRepeat);
+    $('ss-repeat').setAttribute('aria-pressed', String(ssRepeat));
+    $('ss-repeat').title = ssRepeat ? 'くり返し再生：オン' : 'くり返し再生：オフ';
+    ssRevealControls();
+  };
   $('ss-pause').onclick = () => { ssSetPaused(!ssPaused); ssRevealControls(); };
   $('ss-next').onclick = () => ssStep(1);
   $('ss-prev').onclick = () => ssStep(-1);
