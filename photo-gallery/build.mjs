@@ -34,7 +34,7 @@ function today() {
 }
 
 export function parseArgs(argv) {
-  const opts = { title: '競技写真', out: 'dist', date: today(), seconds: 1.5 };
+  const opts = { title: '競技写真', out: 'dist', date: today(), seconds: 1 };
   const rest = [];
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -57,7 +57,7 @@ export function parseArgs(argv) {
     throw new Error('--music には mp3・m4a・aac・ogg・wav のどれかの曲を指定してください');
   }
   opts.seconds = Number(opts.seconds);
-  if (!(opts.seconds >= 0.5 && opts.seconds <= 30)) throw new Error('--seconds は 0.5〜30 の数で書いてください（例: --seconds 1.5）');
+  if (!(opts.seconds >= 0.5 && opts.seconds <= 30)) throw new Error('--seconds は 0.5〜30 の数で書いてください（例: --seconds 2）');
   return opts;
 }
 
@@ -170,7 +170,7 @@ async function runPool(items, limit, worker) {
   await Promise.all(runners);
 }
 
-export function renderHtml(title, images, music = null, seconds = 1.5, back = null) {
+export function renderHtml(title, images, music = null, seconds = 1, back = null, date = null) {
   const data = JSON.stringify(images).replace(/</g, '\\u003c');
   // 置き換えは関数で渡す。ファイル名に「$」があっても特別な記号として扱われないように
   return TEMPLATE
@@ -181,7 +181,13 @@ export function renderHtml(title, images, music = null, seconds = 1.5, back = nu
     .replace('__SLIDE_MS__', () => String(Math.round(seconds * 1000)))
     .replace('__BACK__', () => back
       ? `<div class="back-link"><a href="${escapeHtml(back.url)}">← ${escapeHtml(back.title)}に戻る</a></div>`
-      : '');
+      : '')
+    .replace('__DATE__', () => date ? `<div class="hero-date">${escapeHtml(formatDate(date))}</div>` : '');
+}
+
+export function formatDate(date) {
+  const [y, m, d] = date.split('-').map(Number);
+  return `${y}年${m}月${d}日`;
 }
 
 export function escapeHtml(s) {
@@ -265,7 +271,7 @@ async function main() {
   if (removed) console.log(`外された写真${removed}枚の縮小版を消しました`);
 
   const music = await placeMusic(opts.music, outDir);
-  await writeFile(path.join(outDir, 'index.html'), renderHtml(opts.title, images, music, opts.seconds, await readSite()));
+  await writeFile(path.join(outDir, 'index.html'), renderHtml(opts.title, images, music, opts.seconds, await readSite(), opts.date));
 
   // トップページに並べるため、大会の情報を控えておく
   const events = await readEvents();
@@ -300,92 +306,37 @@ const TEMPLATE = `<!DOCTYPE html>
   }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", Meiryo, sans-serif;
-    background-color: var(--bg-page); color: var(--text-dark); margin: 0; padding: 24px 16px 40px; line-height: 1.6;
+    margin: 0; background: #0b0d12; color: #fff; line-height: 1.6;
   }
-  h1 {
-    max-width: 1400px; margin: 0 auto 4px; font-size: 1.2rem; font-weight: 800;
-    border-left: 4px solid var(--primary); padding-left: 12px; line-height: 1.35;
+  /* 表紙：大会名と「スライドショーを見る」ボタン。後ろでは写真がぼんやり入れ替わる */
+  .hero {
+    position: relative; min-height: 100vh; min-height: 100svh; box-sizing: border-box; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    padding: 76px 20px 48px;
   }
-  .back-link { max-width: 1400px; margin: 0 auto 14px; }
+  .hero-bg {
+    position: absolute; inset: -40px; background-size: cover; background-position: center;
+    filter: blur(22px) brightness(0.42); transform: scale(1.05); opacity: 0; transition: opacity 1.6s ease;
+  }
+  .hero-bg.on { opacity: 1; }
+  .hero-content { position: relative; z-index: 1; max-width: 900px; }
+  .hero-date { font-size: 14px; opacity: .8; letter-spacing: .08em; }
+  .hero-title { font-size: clamp(1.6rem, 5vw, 3rem); font-weight: 800; margin: 8px 0 6px; line-height: 1.3; letter-spacing: .03em; text-shadow: 0 2px 20px rgba(0,0,0,.5); }
+  .hero-count { font-size: 14px; opacity: .8; }
+  #hero-play {
+    margin-top: 30px; font-size: 18px; font-weight: 800; padding: 16px 36px; border-radius: 100px; border: 0;
+    background: #fff; color: #111; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,.35); transition: transform .15s;
+  }
+  #hero-play:hover { transform: scale(1.04); }
+  .hero-note { margin-top: 12px; font-size: 12px; opacity: .7; }
+  .back-link { position: absolute; top: 18px; left: 16px; z-index: 2; }
   .back-link a {
-    display: inline-block; background-color: var(--bg-blue); color: var(--primary-dark); border: 1px solid #c7d2fe;
-    padding: 6px 14px; border-radius: 100px; text-decoration: none; font-size: 0.8125rem; font-weight: 700; transition: all .15s;
+    display: inline-block; color: #fff; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.25);
+    padding: 6px 14px; border-radius: 100px; text-decoration: none; font-size: 0.8125rem; font-weight: 700; transition: background .15s;
   }
-  .back-link a:hover { background-color: var(--primary); color: #fff; border-color: var(--primary); }
-  .subtitle { max-width: 1400px; margin: 0 auto 14px; padding-left: 16px; font-size: 0.8125rem; color: var(--text-light); }
-
-  .pagination { text-align: center; margin: 18px 0; display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .pagination button {
-    background-color: var(--bg-white); color: var(--primary-dark); border: 1px solid var(--border);
-    padding: 7px 16px; font-size: 13px; font-weight: 700; border-radius: 6px; cursor: pointer; transition: all .15s;
-  }
-  .pagination button:hover { background-color: var(--bg-blue); border-color: var(--primary); }
-  .pagination button:disabled { background-color: #f1f5f9; color: #cbd5e1; border-color: var(--border); cursor: not-allowed; }
-  .page-info { font-size: 13px; display: flex; align-items: center; gap: 8px; color: var(--text-light); }
-  select.page-jump {
-    background-color: var(--bg-white); color: var(--text-dark); border: 1px solid var(--border);
-    padding: 5px 8px; font-size: 13px; border-radius: 6px; cursor: pointer; outline: none;
-  }
-
-  .gallery { display: flex; flex-wrap: wrap; gap: 4px; max-width: 100%; }
-  .gallery-item { height: 180px; cursor: pointer; position: relative; overflow: hidden; background-color: #e2e8f0; border-radius: 3px; }
-  .gallery-item img { width: 100%; height: 100%; object-fit: cover; vertical-align: bottom; transition: opacity 0.2s; }
-  .gallery-item:hover img { opacity: 0.75; }
-  .gallery::after { content: ""; flex-grow: 999; min-width: 50%; }
-
-  #modal {
-    display: none; position: fixed; inset: 0;
-    background: rgba(240,244,248,0.97); z-index: 1000; flex-direction: column; align-items: center; justify-content: center;
-  }
-  #modal-header {
-    position: absolute; top: 0; left: 0; width: 100%; height: 56px;
-    display: flex; justify-content: space-between; align-items: center;
-    background: rgba(255,255,255,0.92); border-bottom: 1px solid var(--border);
-    z-index: 2000; pointer-events: none;
-  }
-  #modal-filename { color: var(--text-light); font-size: 13px; padding-left: 20px; }
-  #modal-tools { padding-right: 16px; display: flex; align-items: center; gap: 14px; pointer-events: auto; }
-  #download-btn {
-    background-color: var(--primary); color: #fff; padding: 6px 14px; border-radius: 100px;
-    font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 6px;
-    transition: background 0.15s; font-weight: 700; border: 1px solid var(--primary);
-  }
-  #download-btn:hover { background-color: var(--primary-dark); border-color: var(--primary-dark); }
-  .tool-btn { color: var(--text-light); font-size: 22px; cursor: pointer; user-select: none; transition: color 0.15s; display: flex; align-items: center; }
-  .tool-btn:hover { color: var(--text-dark); }
-
-  #modal-img {
-    max-width: 94%; max-height: 82%; object-fit: contain; z-index: 1001;
-    background: #fff; border: 1px solid var(--border); box-shadow: 0 8px 28px rgba(75,108,183,0.18);
-  }
-  /* 大きい写真が届くまでは、見本を引き伸ばしてぼかして見せる */
-  #modal-img.loading { filter: blur(12px); }
-  #modal-loading {
-    position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
-    color: var(--primary-dark); font-size: 13px; font-weight: 700;
-    background: rgba(255,255,255,.92); border: 1px solid var(--border);
-    padding: 6px 16px; border-radius: 100px; z-index: 2001; display: none;
-  }
-  #modal-loading.show { display: block; }
-
-  .nav-btn {
-    position: absolute; top: 50%; transform: translateY(-50%); font-size: 34px; color: var(--primary-dark);
-    width: 56px; height: 90px; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; user-select: none; z-index: 2000; transition: background 0.15s;
-    background: rgba(255,255,255,0.75);
-  }
-  .nav-btn:hover { background: #fff; }
-  #prev-btn { left: 0; border-radius: 0 8px 8px 0; }
-  #next-btn { right: 0; border-radius: 8px 0 0 8px; }
-
+  .back-link a:hover { background: rgba(255,255,255,.28); }
 
   /* スライドショー：写真をゆっくり動かしながら、ふわっと切り替えて自動で流す */
-  .subtitle { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  #slideshow-btn {
-    background: var(--primary); color: #fff; border: 1px solid var(--primary); border-radius: 100px;
-    padding: 5px 14px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background .15s;
-  }
-  #slideshow-btn:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
   #slideshow { display: none; position: fixed; inset: 0; background: #000; z-index: 3000; overflow: hidden; cursor: none; --ss-dur: 2.2s; --ss-fade: 0.6s; }
   #slideshow.show { display: block; }
   #slideshow.controls-visible, #slideshow.paused { cursor: default; }
@@ -435,45 +386,21 @@ const TEMPLATE = `<!DOCTYPE html>
     .ss-speed button { background: rgba(255,255,255,.14); }
   }
 
-  @media (max-width: 800px) {
-    .gallery-item { height: 120px; }
-    .nav-btn { font-size: 26px; width: 40px; }
-    #download-btn { font-size: 12px; padding: 5px 12px; }
-  }
 </style>
 </head>
 <body>
-  __BACK__
-  <h1>__TITLE__</h1>
-  <div class="subtitle"><span>全__COUNT__枚</span><button id="slideshow-btn" type="button">▶ スライドショーで見る</button></div>
-
-  <div class="pagination">
-    <button id="btn-prev-top">＜ 前のページ</button>
-    <span class="page-info"><select class="page-jump" id="page-select-top"></select> / <span id="total-pages-top"></span></span>
-    <button id="btn-next-top">次のページ ＞</button>
-  </div>
-
-  <div class="gallery" id="gallery-container"></div>
-
-  <div class="pagination">
-    <button id="btn-prev-bottom">＜ 前のページ</button>
-    <span class="page-info"><select class="page-jump" id="page-select-bottom"></select> / <span id="total-pages-bottom"></span></span>
-    <button id="btn-next-bottom">次のページ ＞</button>
-  </div>
-
-  <div id="modal">
-    <div id="modal-header">
-      <div id="modal-filename"></div>
-      <div id="modal-tools">
-        <a id="download-btn" href="#" download title="画像を保存">⬇ ダウンロード</a>
-        <div id="modal-close" class="tool-btn" title="閉じる">✖</div>
-      </div>
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-bg"></div>
+    __BACK__
+    <div class="hero-content">
+      __DATE__
+      <h1 class="hero-title">__TITLE__</h1>
+      <div class="hero-count">全__COUNT__枚</div>
+      <button id="hero-play" type="button">▶ スライドショーを見る</button>
+      <div class="hero-note" id="hero-note"></div>
     </div>
-    <div class="nav-btn" id="prev-btn">&#10094;</div>
-    <img id="modal-img" src="" alt="">
-    <div class="nav-btn" id="next-btn">&#10095;</div>
-    <div id="modal-loading">読み込み中…</div>
-  </div>
+  </section>
 
   <div id="slideshow" aria-label="スライドショー">
     <div class="ss-slide"><img class="ss-bg" alt=""><img class="ss-fg" alt=""></div>
@@ -502,124 +429,28 @@ const TEMPLATE = `<!DOCTYPE html>
 
 <script>
   const images = __IMAGES__;
-  const ITEMS_PER_PAGE = 120;
-  const totalPages = Math.ceil(images.length / ITEMS_PER_PAGE) || 1;
-  let currentPage = 1;
-  let currentIndex = 0;
-  let loadToken = 0;
 
   const $ = id => document.getElementById(id);
-  const gallery = $('gallery-container');
-  const modal = $('modal');
-  const modalImg = $('modal-img');
-  const modalLoading = $('modal-loading');
-  const downloadBtn = $('download-btn');
 
-  function initPagination() {
-    for (const pos of ['top', 'bottom']) {
-      const select = $('page-select-' + pos);
-      for (let i = 1; i <= totalPages; i++) select.options.add(new Option(i, i));
-      select.addEventListener('change', e => goToPage(parseInt(e.target.value, 10)));
-      $('total-pages-' + pos).textContent = totalPages;
-      $('btn-prev-' + pos).onclick = () => goToPage(currentPage - 1);
-      $('btn-next-' + pos).onclick = () => goToPage(currentPage + 1);
-    }
-  }
-
-  function renderPage() {
-    gallery.innerHTML = '';
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    const end = Math.min(start + ITEMS_PER_PAGE, images.length);
-    for (let i = start; i < end; i++) {
-      const item = images[i];
-      const div = document.createElement('div');
-      div.className = 'gallery-item';
-      div.style.flexGrow = item.aspect;
-      div.style.width = 'calc(180px * ' + item.aspect + ')';
-      div.onclick = () => openModal(i);
-      const img = document.createElement('img');
+  // 表紙の後ろで、見本の写真をぼかしてゆっくり入れ替える
+  (function heroBackground() {
+    const layers = document.querySelectorAll('.hero-bg');
+    let n = 0;
+    function next() {
+      const layer = layers[n % 2];
+      const item = images[Math.floor(Math.random() * images.length)];
+      const img = new Image();
+      img.onload = () => {
+        layer.style.backgroundImage = 'url("' + item.thumb.replace(/"/g, '%22') + '")';
+        layer.classList.add('on');
+        layers[(n + 1) % 2].classList.remove('on');
+        n++;
+      };
       img.src = item.thumb;
-      img.loading = 'lazy';
-      img.alt = item.filename;
-      div.appendChild(img);
-      gallery.appendChild(div);
     }
-    for (const pos of ['top', 'bottom']) {
-      $('btn-prev-' + pos).disabled = currentPage === 1;
-      $('btn-next-' + pos).disabled = currentPage === totalPages;
-      $('page-select-' + pos).value = currentPage;
-    }
-  }
-
-  function goToPage(page) {
-    currentPage = Math.min(Math.max(page, 1), totalPages);
-    renderPage();
-    window.scrollTo(0, 0);
-  }
-
-  function openModal(index) {
-    currentIndex = index;
-    showCurrent();
-    modal.style.display = 'flex';
-  }
-
-  function showCurrent() {
-    const item = images[currentIndex];
-    $('modal-filename').textContent = item.filename;
-    downloadBtn.href = item.src;
-    downloadBtn.download = item.filename;
-
-    modalImg.src = item.thumb;
-    modalImg.classList.add('loading');
-    modalLoading.textContent = '読み込み中…';
-    modalLoading.classList.add('show');
-
-    // 連打したとき、前の写真があとから届いて差し替わらないようにする
-    const token = ++loadToken;
-    const full = new Image();
-    full.onload = () => {
-      if (token !== loadToken) return;
-      modalImg.src = full.src;
-      modalImg.classList.remove('loading');
-      modalLoading.classList.remove('show');
-    };
-    full.onerror = () => {
-      if (token !== loadToken) return;
-      modalLoading.textContent = '写真を読み込めませんでした';
-    };
-    full.src = item.src;
-
-    // 前後の写真を先に読んでおくと、めくるときに待たされない
-    for (const d of [1, -1]) {
-      const n = images[(currentIndex + d + images.length) % images.length];
-      if (n !== item) new Image().src = n.src;
-    }
-  }
-
-  function step(delta, e) {
-    if (e) e.stopPropagation();
-    currentIndex = (currentIndex + delta + images.length) % images.length;
-    const page = Math.floor(currentIndex / ITEMS_PER_PAGE) + 1;
-    if (page !== currentPage) { currentPage = page; renderPage(); }
-    showCurrent();
-  }
-
-  function closeModal() {
-    modal.style.display = 'none';
-    modalImg.src = '';
-  }
-
-  modal.onclick = e => { if (e.target === modal) closeModal(); };
-  $('modal-close').onclick = closeModal;
-  downloadBtn.onclick = e => e.stopPropagation();
-  $('next-btn').onclick = e => step(1, e);
-  $('prev-btn').onclick = e => step(-1, e);
-  document.addEventListener('keydown', e => {
-    if (modal.style.display !== 'flex') return;
-    if (e.key === 'ArrowRight') step(1);
-    if (e.key === 'ArrowLeft') step(-1);
-    if (e.key === 'Escape') closeModal();
-  });
+    next();
+    setInterval(() => { if (!slideshow.classList.contains('show')) next(); }, 4500);
+  })();
 
   // ---- スライドショー ----
   const MUSIC = __MUSIC__;
@@ -778,7 +609,8 @@ const TEMPLATE = `<!DOCTYPE html>
     document.body.style.overflow = '';
   }
 
-  $('slideshow-btn').onclick = () => openSlideshow(0);
+  $('hero-play').onclick = () => openSlideshow(0);
+  if (MUSIC) $('hero-note').textContent = '♪ 音楽が流れます';
   $('ss-close').onclick = closeSlideshow;
   $('ss-pause').onclick = () => { ssSetPaused(!ssPaused); ssRevealControls(); };
   $('ss-next').onclick = () => ssStep(1);
@@ -803,9 +635,6 @@ const TEMPLATE = `<!DOCTYPE html>
     if (e.key === 'ArrowLeft') ssStep(-1);
     if (e.key === 'Escape') closeSlideshow();
   });
-
-  initPagination();
-  renderPage();
 </script>
 </body>
 </html>

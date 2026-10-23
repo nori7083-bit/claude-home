@@ -47,8 +47,8 @@ test('parseArgs: 曲は決まった形式だけ受け付ける', () => {
   assert.throws(() => parseArgs(['p', '--name', 'ab', '--music', 'song.mid']));
 });
 
-test('秒数: 書かなければ1.5秒、ページには ミリ秒で入る', () => {
-  assert.equal(parseArgs(['p', '--name', 'ab']).seconds, 1.5);
+test('秒数: 書かなければ1秒、ページには ミリ秒で入る', () => {
+  assert.equal(parseArgs(['p', '--name', 'ab']).seconds, 1);
   assert.equal(parseArgs(['p', '--name', 'ab', '--seconds', '3']).seconds, 3);
   assert.throws(() => parseArgs(['p', '--name', 'ab', '--seconds', 'abc']));
   assert.throws(() => parseArgs(['p', '--name', 'ab', '--seconds', '0.1']));
@@ -62,4 +62,14 @@ test('renderHtml: トップページの記録があれば「戻る」ボタン�
   assert.ok(html.includes('<a href="https://nori-photos.pages.dev">← 大会&lt;写真&gt;に戻る</a>'));
   const none = renderHtml('t', imgs);
   assert.ok(!none.includes('back-link"><a') && !none.includes('__BACK__'));
+});
+
+test('renderHtml: 写真一覧とダウンロードボタンはなく、表紙からスライドショーを始める', () => {
+  const imgs = [{ filename: 'a.jpg', src: 'images/a.jpg', thumb: 'thumbnails/a.jpg', aspect: 1 }];
+  const html = renderHtml('t', imgs, null, 1, null, '2026-09-20');
+  assert.ok(!html.includes('download'));
+  assert.ok(!html.includes('gallery-container'));
+  assert.ok(html.includes('id="hero-play"'));
+  assert.ok(html.includes('2026年9月20日'));
+  assert.ok(!renderHtml('t', imgs).includes('__DATE__'));
 });

@@ -3,7 +3,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { NAME_PATTERN, escapeHtml, readEvents, readSite, writeEvents, writeSite } from './build.mjs';
+import { NAME_PATTERN, escapeHtml, formatDate, readEvents, readSite, writeEvents, writeSite } from './build.mjs';
 
 export function parseTopArgs(argv) {
   const opts = { title: '写真ギャラリー', out: 'dist', remove: [] };
@@ -23,11 +23,6 @@ export function parseTopArgs(argv) {
     throw new Error('サイト名は英小文字・数字・ハイフンだけで、2〜58文字にしてください（例: nori-photos）');
   }
   return opts;
-}
-
-function formatDate(date) {
-  const [y, m, d] = date.split('-').map(Number);
-  return `${y}年${m}月${d}日`;
 }
 
 // 写真のファイル名に空白や日本語があっても、住所として正しく読めるようにする
