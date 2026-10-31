@@ -342,8 +342,8 @@ const TEMPLATE = `<!DOCTYPE html>
   #slideshow.controls-visible, #slideshow.paused { cursor: default; }
   .ss-slide { position: absolute; inset: 0; opacity: 0; transition: opacity var(--ss-fade) ease; }
   .ss-slide.active { opacity: 1; }
-  .ss-bg { position: absolute; top: -60px; left: -60px; width: calc(100% + 120px); height: calc(100% + 120px); object-fit: cover; filter: blur(30px) brightness(0.45); }
-  .ss-fg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; will-change: transform; }
+  .ss-bg { position: absolute; top: -60px; left: -60px; width: calc(100% + 120px); height: calc(100% + 120px); object-fit: cover; filter: blur(30px) brightness(calc(0.45 * var(--ss-bright, 1))); }
+  .ss-fg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; will-change: transform; filter: brightness(var(--ss-bright, 1)); }
   .ss-slide.kb .ss-fg { animation: ss-kenburns var(--ss-dur) ease-out forwards; }
   @keyframes ss-kenburns {
     from { transform: scale(var(--s0)) translate(var(--x0), var(--y0)); }
@@ -393,11 +393,18 @@ const TEMPLATE = `<!DOCTYPE html>
   }
   .ss-speed button:hover { background: rgba(255,255,255,.18); }
   .ss-speed button.on { background: #fff; color: #111; }
+  /* 明るさのつまみ。暗く写った写真が多いときに、見る人が自分で明るくできる */
+  .ss-bright { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 100px; background: rgba(255,255,255,.14); }
+  .ss-bright-label { border: 0; background: none; color: #fff; font-size: 16px; cursor: pointer; padding: 0; line-height: 1; }
+  .ss-bright input { width: 110px; accent-color: #fff; cursor: pointer; }
+  .ss-bright-value { font-size: 12px; opacity: .85; min-width: 3.2em; text-align: right; font-variant-numeric: tabular-nums; }
   @media (max-width: 600px) {
     .ss-controls { flex-wrap: wrap; gap: 8px; }
     .ss-btn { width: 40px; height: 40px; font-size: 15px; }
     .ss-speed { order: -1; width: 100%; justify-content: center; background: none; }
     .ss-speed button { background: rgba(255,255,255,.14); }
+    .ss-bright { order: -1; width: 100%; justify-content: center; background: none; }
+    .ss-bright input { width: 55%; }
   }
 
 </style>
@@ -442,6 +449,11 @@ const TEMPLATE = `<!DOCTYPE html>
         <button type="button" data-ms="1500">1.5秒</button>
         <button type="button" data-ms="2000">2秒</button>
         <button type="button" data-ms="3000">3秒</button>
+      </div>
+      <div class="ss-bright">
+        <button type="button" class="ss-bright-label" id="ss-bright-reset" title="元の明るさに戻す">☀</button>
+        <input type="range" id="ss-bright" min="0.6" max="1.8" step="0.05" value="1" aria-label="明るさ">
+        <span class="ss-bright-value" id="ss-bright-value">100%</span>
       </div>
       <span class="ss-counter" id="ss-counter"></span>
       <button class="ss-btn" id="ss-close" type="button" title="終わる">✕</button>
@@ -515,6 +527,25 @@ const TEMPLATE = `<!DOCTYPE html>
     };
   });
   if (!MUSIC) $('ss-mute').style.display = 'none';
+
+  // 明るさ：写真そのものは変えず、表示するときだけ明るく・暗くする
+  const BRIGHT_KEY = 'gallery-brightness';
+  function applyBrightness(v) {
+    slideshow.style.setProperty('--ss-bright', String(v));
+    $('ss-bright').value = String(v);
+    $('ss-bright-value').textContent = Math.round(v * 100) + '%';
+  }
+  try {
+    const saved = parseFloat(localStorage.getItem(BRIGHT_KEY));
+    applyBrightness(saved >= 0.6 && saved <= 1.8 ? saved : 1);
+  } catch (e) { applyBrightness(1); }
+  function saveBrightness(v) {
+    applyBrightness(v);
+    try { localStorage.setItem(BRIGHT_KEY, String(v)); } catch (e) {}
+    ssRevealControls();
+  }
+  $('ss-bright').addEventListener('input', e => saveBrightness(parseFloat(e.target.value)));
+  $('ss-bright-reset').onclick = () => saveBrightness(1);
 
   function loadImage(src) {
     return new Promise(resolve => {
@@ -686,6 +717,7 @@ const TEMPLATE = `<!DOCTYPE html>
   slideshow.addEventListener('touchstart', ssRevealControls, { passive: true });
   document.addEventListener('keydown', e => {
     if (!slideshow.classList.contains('show')) return;
+    if (e.target && e.target.id === 'ss-bright' && e.key !== 'Escape') return;
     if (e.key === ' ') { e.preventDefault(); ssSetPaused(!ssPaused); ssRevealControls(); }
     if (e.key === 'ArrowRight') ssStep(1);
     if (e.key === 'ArrowLeft') ssStep(-1);
