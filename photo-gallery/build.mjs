@@ -16,6 +16,7 @@ export const SITE_FILE = path.join(path.dirname(fileURLToPath(import.meta.url)),
 // 大きい写真の長い辺。スマホやパソコンで見るには十分で、1枚あたり数百KBに収まる
 const FULL_LONG_EDGE = 2400;
 const FULL_QUALITY = 82;
+const LIFTED_QUALITY = 92;
 // 一覧の見本は高さ180pxで並べるので、きれいに見えるよう2倍で作る
 const THUMB_HEIGHT = 360;
 const THUMB_QUALITY = 70;
@@ -33,7 +34,7 @@ const DARK_BELOW = 0.34;
 const TARGET = 0.40;
 const MAX_LIFT = 1.8;
 // 縮小のやり方を変えたら数字を上げる。上がっていたら、前回の縮小版を使わずに作り直す
-const PROCESS_VERSION = 2;
+const PROCESS_VERSION = 3;
 
 function today() {
   const d = new Date();
@@ -137,20 +138,28 @@ async function measureBrightness(sharp, input) {
 async function resizePhoto(sharp, input, fullPath, thumbPath, brighten) {
   const lift = brighten ? liftFor(await measureBrightness(sharp, input)) : 1;
   // rotate() はカメラが記録した向きの情報どおりに回す。縦位置の写真が横倒しにならないように
+  const lifted = lift > 1.02;
   const base = () => {
     const img = sharp(input).rotate();
-    // gamma(1, lift) は暗い部分ほど大きく持ち上げ、明るい部分はほとんど変えない
-    return lift > 1.02 ? img.gamma(1, lift) : img;
+    if (!lifted) return img;
+    // gamma(1, lift) は暗い部分ほど大きく持ち上げ、明るい部分はほとんど変えない。
+    // 細かい段階で計算して（16ビット）、持ち上げた暗い部分に縞模様が出にくいようにする
+    return img.pipelineColourspace('rgb16').gamma(1, lift).toColourspace('srgb');
   };
+  // 明るくした写真は、暗いところに隠れていたざらつきが見えやすくなる。
+  // 圧縮を控えめにして、色の細かさも落とさずに保存する
+  const fullJpeg = lifted
+    ? { quality: LIFTED_QUALITY, mozjpeg: true, chromaSubsampling: '4:4:4' }
+    : { quality: FULL_QUALITY, mozjpeg: true };
   const full = await base()
     .resize(FULL_LONG_EDGE, FULL_LONG_EDGE, { fit: 'inside', withoutEnlargement: true })
-    .jpeg({ quality: FULL_QUALITY, mozjpeg: true })
+    .jpeg(fullJpeg)
     .toFile(fullPath);
   await base()
     .resize({ height: THUMB_HEIGHT, withoutEnlargement: true })
     .jpeg({ quality: THUMB_QUALITY, mozjpeg: true })
     .toFile(thumbPath);
-  return { ...full, lifted: lift > 1.02 };
+  return { ...full, lifted };
 }
 
 export async function removeStale(dirs, keep) {
