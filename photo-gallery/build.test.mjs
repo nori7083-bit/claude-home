@@ -73,3 +73,13 @@ test('renderHtml: 写真一覧とダウンロードボタンはなく、表紙�
   assert.ok(html.includes('2026年9月20日'));
   assert.ok(!renderHtml('t', imgs).includes('__DATE__'));
 });
+
+test('自動補正: 暗い写真だけを明るくし、強くしすぎない', async () => {
+  const { liftFor } = await import('./build.mjs');
+  assert.equal(liftFor(0.5), 1);
+  assert.equal(liftFor(0.34), 1);
+  assert.ok(liftFor(0.25) > 1 && liftFor(0.25) < 1.8);
+  assert.equal(liftFor(0.02), 1.8);
+  assert.equal(parseArgs(['p', '--name', 'ab']).brighten, true);
+  assert.equal(parseArgs(['p', '--name', 'ab', '--no-brighten']).brighten, false);
+});

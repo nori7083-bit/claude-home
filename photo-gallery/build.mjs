@@ -1,5 +1,5 @@
 // 写真フォルダから、写真一覧ページ（index.html）と縮小した写真を作る。
-// 使い方: node build.mjs <写真フォルダ> --name <サイト名> [--title <ページの題名>] [--date <YYYY-MM-DD>] [--music <曲のファイル>] [--seconds <1枚の秒数>] [--out <出力先>]
+// 使い方: node build.mjs <写真フォルダ> --name <サイト名> [--title <ページの題名>] [--date <YYYY-MM-DD>] [--music <曲のファイル>] [--seconds <1枚の秒数>] [--no-brighten] [--out <出力先>]
 import { copyFile, readdir, mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { execFile } from 'node:child_process';
@@ -27,6 +27,13 @@ export const NAME_PATTERN = /^[a-z0-9][a-z0-9-]{0,56}[a-z0-9]$/;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 // スライドショーで流せる曲の形式（どのブラウザでも鳴りやすいもの）
 const MUSIC_EXTS = new Set(['.mp3', '.m4a', '.aac', '.ogg', '.wav']);
+// 暗い写真の自動補正。写真全体の平均の明るさ（0〜1）が DARK_BELOW より暗いときだけ、
+// TARGET に近づくよう暗い部分を中心に持ち上げる。明るい部分は白く飛ばない
+const DARK_BELOW = 0.34;
+const TARGET = 0.40;
+const MAX_LIFT = 1.8;
+// 縮小のやり方を変えたら数字を上げる。上がっていたら、前回の縮小版を使わずに作り直す
+const PROCESS_VERSION = 2;
 
 function today() {
   const d = new Date();
@@ -34,7 +41,7 @@ function today() {
 }
 
 export function parseArgs(argv) {
-  const opts = { title: '競技写真', out: 'dist', date: today(), seconds: 1 };
+  const opts = { title: '競技写真', out: 'dist', date: today(), seconds: 1, brighten: true };
   const rest = [];
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -42,6 +49,8 @@ export function parseArgs(argv) {
       const value = argv[++i];
       if (value === undefined) throw new Error(`${a} のあとに値を書いてください`);
       opts[a.slice(2)] = value;
+    } else if (a === '--no-brighten') {
+      opts.brighten = false;
     } else {
       rest.push(a);
     }
@@ -104,28 +113,44 @@ async function convertHeic(srcPath, workDir) {
   return out;
 }
 
-async function processPhoto(sharp, srcPath, fullPath, thumbPath, workDir) {
+async function processPhoto(sharp, srcPath, fullPath, thumbPath, workDir, brighten) {
   const isHeic = HEIC_EXTS.has(path.extname(srcPath).toLowerCase());
   const input = isHeic ? await convertHeic(srcPath, workDir) : srcPath;
   try {
-    return await resizePhoto(sharp, input, fullPath, thumbPath);
+    return await resizePhoto(sharp, input, fullPath, thumbPath, brighten);
   } finally {
     if (isHeic) await rm(input, { force: true });
   }
 }
 
-async function resizePhoto(sharp, input, fullPath, thumbPath) {
+// どれだけ明るくするか（1なら何もしない）。平均の明るさ mean を TARGET に近づける強さを求める
+export function liftFor(mean) {
+  if (!(mean > 0) || mean >= DARK_BELOW) return 1;
+  return Math.min(MAX_LIFT, Math.log(mean) / Math.log(TARGET));
+}
+
+async function measureBrightness(sharp, input) {
+  const { channels } = await sharp(input).rotate().resize(64, 64, { fit: 'inside' }).greyscale().stats();
+  return channels[0].mean / 255;
+}
+
+async function resizePhoto(sharp, input, fullPath, thumbPath, brighten) {
+  const lift = brighten ? liftFor(await measureBrightness(sharp, input)) : 1;
   // rotate() はカメラが記録した向きの情報どおりに回す。縦位置の写真が横倒しにならないように
-  const base = sharp(input).rotate();
-  const full = await base.clone()
+  const base = () => {
+    const img = sharp(input).rotate();
+    // gamma(1, lift) は暗い部分ほど大きく持ち上げ、明るい部分はほとんど変えない
+    return lift > 1.02 ? img.gamma(1, lift) : img;
+  };
+  const full = await base()
     .resize(FULL_LONG_EDGE, FULL_LONG_EDGE, { fit: 'inside', withoutEnlargement: true })
     .jpeg({ quality: FULL_QUALITY, mozjpeg: true })
     .toFile(fullPath);
-  await base.clone()
+  await base()
     .resize({ height: THUMB_HEIGHT, withoutEnlargement: true })
     .jpeg({ quality: THUMB_QUALITY, mozjpeg: true })
     .toFile(thumbPath);
-  return full;
+  return { ...full, lifted: lift > 1.02 };
 }
 
 export async function removeStale(dirs, keep) {
@@ -230,8 +255,19 @@ async function main() {
   await mkdir(imagesDir, { recursive: true });
   await mkdir(thumbsDir, { recursive: true });
 
+  // 前回と縮小のやり方（版や自動補正のオン・オフ）が違えば、全部作り直す
+  const stampPath = path.join(path.resolve(opts.out), `.${opts.name}.build.json`);
+  const stamp = { version: PROCESS_VERSION, brighten: opts.brighten };
+  let reuse = false;
+  try {
+    const prev = JSON.parse(await readFile(stampPath, 'utf8'));
+    reuse = prev.version === stamp.version && prev.brighten === stamp.brighten;
+  } catch (e) {}
+  if (!reuse) await rm(stampPath, { force: true });
+
   const { default: sharp } = await import('sharp');
   const images = new Array(files.length);
+  let lifted = 0;
   let done = 0;
   let skipped = 0;
   const workDir = await mkdtemp(path.join(tmpdir(), 'photo-gallery-'));
@@ -244,11 +280,12 @@ async function main() {
       const thumbPath = path.join(thumbsDir, names[i]);
       let size;
       // 2回目以降は、変わっていない写真の縮小を飛ばして時間を短くする
-      if (await isUpToDate(srcPath, [fullPath, thumbPath])) {
+      if (reuse && await isUpToDate(srcPath, [fullPath, thumbPath])) {
         size = await readSize(sharp, fullPath);
         skipped++;
       } else {
-        size = await processPhoto(sharp, srcPath, fullPath, thumbPath, workDir);
+        size = await processPhoto(sharp, srcPath, fullPath, thumbPath, workDir, opts.brighten);
+        if (size.lifted) lifted++;
       }
       images[i] = {
         filename: names[i],
@@ -265,6 +302,8 @@ async function main() {
     await rm(workDir, { recursive: true, force: true });
   }
   process.stdout.write('\n');
+  await writeFile(stampPath, JSON.stringify(stamp) + '\n');
+  if (lifted) console.log(`暗い写真${lifted}枚を、自動で明るくしました`);
 
   // 元のフォルダから外した写真の縮小版を消す。残すと公開し直したときにいっしょに送られてしまう
   const removed = await removeStale([imagesDir, thumbsDir], new Set(names));
