@@ -35,7 +35,8 @@
   .ev summary::-webkit-details-marker { display: none; }
   .ev-time { flex: 0 0 auto; font-size: 12px; color: #fff; background: var(--primary); border-radius: 100px; padding: 1px 8px; font-variant-numeric: tabular-nums; }
   .ev-title { font-size: 15px; line-height: 1.45; }
-  .ev-more { margin: 6px 0 4px; padding: 8px 10px; background: var(--bg-blue); border-radius: 8px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
+  .ev-more { margin: 6px 0 4px; padding: 8px 10px; background: var(--bg-blue); border-radius: 8px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .ev-more a { color: var(--primary-dark); font-weight: 700; }
   .ev-more .loc { font-weight: 700; }
   .ev[open] .ev-title { font-weight: 700; }
   .msg { padding: 16px; color: var(--muted); font-size: 14px; }
@@ -65,9 +66,30 @@
     return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
+  // 「終日」は見た目のために使っているので出さない。
+  // かわりに、説明に「13:00〜16:00」のような時間が書いてあれば、それを出す
   function timeLabel(e) {
-    if (e.allDay) return e.endDate ? '〜' + e.endDate.slice(5).replace('-', '/').replace(/^0/, '').replace('/0', '/') : '終日';
-    return e.start + (e.end ? '〜' + e.end : '');
+    if (!e.allDay) return e.start + (e.end ? '〜' + e.end : '');
+    if (e.endDate) {
+      const [, m, d] = e.endDate.split('-').map(Number);
+      return '〜' + m + '/' + d;
+    }
+    const t = (e.description || '').match(/(\d{1,2})[:：](\d{2})\s*[〜~～\-ー－]\s*(\d{1,2})[:：](\d{2})/)
+      || (e.description || '').match(/(\d{1,2})[:：](\d{2})/);
+    if (!t) return '';
+    return t[1] + ':' + t[2] + (t[3] ? '〜' + t[3] + ':' + t[4] : '');
+  }
+
+  // 説明の中の住所（https://…）を、押せるリンクにする
+  function linkify(text) {
+    let out = '';
+    let last = 0;
+    for (const m of text.matchAll(/https?:\/\/[^\s<>"'）)」]+/g)) {
+      out += esc(text.slice(last, m.index));
+      out += '<a href="' + esc(m[0]) + '" target="_blank" rel="noopener noreferrer">' + esc(m[0]) + '</a>';
+      last = m.index + m[0].length;
+    }
+    return out + esc(text.slice(last));
   }
 
   function render(events) {
@@ -82,8 +104,9 @@
     for (const [date, evs] of byDay) {
       html += '<div class="day"><div class="day-head">' + formatDay(date, Number(date.slice(0, 4)) !== thisYear) + '</div>';
       for (const e of evs) {
-        const more = [e.location ? '<div class="loc">📍 ' + esc(e.location) + '</div>' : '', e.description ? esc(e.description) : ''].join('');
-        html += '<details class="ev"><summary><span class="ev-time">' + esc(timeLabel(e)) + '</span>'
+        const more = [e.location ? '<div class="loc">📍 ' + linkify(e.location) + '</div>' : '', e.description ? linkify(e.description) : ''].join('');
+        const label = timeLabel(e);
+        html += '<details class="ev"><summary>' + (label ? '<span class="ev-time">' + esc(label) + '</span>' : '')
           + '<span class="ev-title">' + esc(e.title) + '</span></summary>'
           + (more ? '<div class="ev-more">' + more + '</div>' : '') + '</details>';
       }

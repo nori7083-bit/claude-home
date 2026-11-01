@@ -70,7 +70,7 @@ export function parseIcs(text) {
         end: !start.allDay && end && end.date === start.date ? end.time : null,
         title: unescapeText(e.SUMMARY?.value || '（題名なし）'),
         location: unescapeText(e.LOCATION?.value || ''),
-        description: unescapeText(e.DESCRIPTION?.value || ''),
+        description: htmlToText(unescapeText(e.DESCRIPTION?.value || '')),
         repeats: Boolean(e.RRULE),
       };
     });
@@ -95,6 +95,41 @@ function parseDate({ value, params }) {
     time: `${pad(dt.getUTCHours())}:${pad(dt.getUTCMinutes())}`,
     allDay: false,
   };
+}
+
+// Google カレンダーの説明は、リンクを入れると <a href="…">…</a> のような書き方になる。
+// 文字とリンクの住所だけを取り出して、ふつうの文章に直す（リンクは一覧の側で押せるようにする）
+export function htmlToText(s) {
+  if (!/<[a-z!/]/i.test(s)) return s;
+  return decodeEntities(s
+    .replace(/<a\b[^>]*href\s*=\s*["']([^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi, (_, href, text) => {
+      const url = unwrapGoogleUrl(decodeEntities(href));
+      const label = decodeEntities(text.replace(/<[^>]*>/g, '')).trim();
+      return !label || label === url || url.includes(label) ? url : `${label}：${url}`;
+    })
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div|li)>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '・')
+    .replace(/<[^>]*>/g, ''))
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+// Google が付け足す「https://www.google.com/url?q=本当の住所」を、本当の住所に戻す
+function unwrapGoogleUrl(url) {
+  const m = url.match(/^https?:\/\/www\.google\.[a-z.]+\/url\?(?:.*&)?q=([^&]+)/i);
+  return m ? decodeURIComponent(m[1]) : url;
+}
+
+function decodeEntities(s) {
+  return s
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+    .replace(/&amp;/g, '&');
 }
 
 function unescapeText(s) {
