@@ -76,18 +76,12 @@
     return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
-  // 「終日」は見た目のために使っているので出さない。
-  // かわりに、説明に「13:00〜16:00」のような時間が書いてあれば、それを出す
+  // 時間は出さない（予定はすべて終日で入れ、時間や場所は詳細で確かめてもらう。誤入力の心配も減る）。
+  // 何日かにまたがる予定だけ、終わりの日を出す
   function timeLabel(e) {
-    if (!e.allDay) return e.start + (e.end ? '〜' + e.end : '');
-    if (e.endDate) {
-      const [, m, d] = e.endDate.split('-').map(Number);
-      return '〜' + m + '/' + d;
-    }
-    const t = (e.description || '').match(/(\d{1,2})[:：](\d{2})\s*[〜~～\-ー－]\s*(\d{1,2})[:：](\d{2})/)
-      || (e.description || '').match(/(\d{1,2})[:：](\d{2})/);
-    if (!t) return '';
-    return t[1] + ':' + t[2] + (t[3] ? '〜' + t[3] + ':' + t[4] : '');
+    if (!e.endDate) return '';
+    const [, m, d] = e.endDate.split('-').map(Number);
+    return '〜' + m + '/' + d;
   }
 
   // 説明の中の住所（https://…）を、押せるリンクにする
