@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>イベントカレンダー｜岡山県ダンススポーツ連盟</title>
+<!--
+  ホームページの「イベントカレンダー」に表示するページ。
+  サイト管理にはリンクしか貼れないので、このページを Cloudflare Pages に置いて、そのリンクを貼る。
+  画面が広いとき（パソコン）は月の表、狭いとき（スマホ）は予定の一覧に切り替える。
+  カレンダーを増やすときは、下の2つの住所の両方に「&amp;src=カレンダーID&amp;color=%23色」を足す。
+-->
+<style>
+  html, body { margin: 0; height: 100%; background: transparent; }
+  iframe { display: block; width: 100%; height: 100%; border: 0; }
+  .list { display: none; }
+  @media (max-width: 640px) {
+    .month { display: none; }
+    .list { display: block; }
+  }
+</style>
+</head>
+<body>
+  <iframe class="month" title="イベントカレンダー（月の表）" loading="lazy"
+    src="https://calendar.google.com/calendar/embed?src=9ebb3213869f1721c4e0b0e74ecd89fe9d4c0a080dbb4f4034b070fa78ce72e9%40group.calendar.google.com&amp;ctz=Asia%2FTokyo&amp;hl=ja&amp;wkst=1&amp;showTitle=0&amp;showPrint=0&amp;showCalendars=0&amp;showTz=0&amp;color=%234B6CB7&amp;mode=MONTH"></iframe>
+  <iframe class="list" title="イベントカレンダー（予定の一覧）" loading="lazy"
+    src="https://calendar.google.com/calendar/embed?src=9ebb3213869f1721c4e0b0e74ecd89fe9d4c0a080dbb4f4034b070fa78ce72e9%40group.calendar.google.com&amp;ctz=Asia%2FTokyo&amp;hl=ja&amp;wkst=1&amp;showTitle=0&amp;showPrint=0&amp;showCalendars=0&amp;showTz=0&amp;color=%234B6CB7&amp;mode=AGENDA&amp;showTabs=0"></iframe>
+</body>
+</html>
