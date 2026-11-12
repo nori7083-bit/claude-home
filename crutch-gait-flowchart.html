@@ -1,0 +1,117 @@
+<title>松葉杖歩行導入フローチャート</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: 1 column vertical flowchart, then two note panels */
+:root{
+  --bg:#f3f6fa; --card:#ffffff; --fg:#1f2933; --muted:#5f6b7a;
+  --accent:#005bac; --accent-fg:#ffffff;
+  --warn:#f0a500; --warn-bg:#fff8e1;
+  --ok:#2e8b57; --ok-bg:#e8f6ec;
+  --ng:#d9534f;
+  --line:#8a96a5; --shadow:0 3px 10px rgba(0,0,0,.08);
+  --font:"Yu Gothic","Hiragino Sans","Meiryo",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10161d; --card:#1a232d; --fg:#e6ebf1; --muted:#9aa7b6;
+    --accent:#5aa7ee; --accent-fg:#0b1118;
+    --warn:#f2b632; --warn-bg:#2b2410;
+    --ok:#4fbf80; --ok-bg:#13291d;
+    --ng:#f07a76; --line:#6b7787; --shadow:0 3px 10px rgba(0,0,0,.4);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10161d; --card:#1a232d; --fg:#e6ebf1; --muted:#9aa7b6;
+  --accent:#5aa7ee; --accent-fg:#0b1118;
+  --warn:#f2b632; --warn-bg:#2b2410;
+  --ok:#4fbf80; --ok-bg:#13291d;
+  --ng:#f07a76; --line:#6b7787; --shadow:0 3px 10px rgba(0,0,0,.4);
+  color-scheme:dark;
+}
+body{
+  background:var(--bg); color:var(--fg); font-family:var(--font);
+  font-size:16px; line-height:1.7;
+  padding-block:32px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.container{max-width:760px;margin:0 auto}
+h1{text-align:center;color:var(--accent);font-size:1.7rem;line-height:1.3;margin:0 0 6px;text-wrap:balance}
+.subtitle{text-align:center;color:var(--muted);margin:0 0 32px;font-size:.95rem}
+.flow{display:flex;flex-direction:column;align-items:center}
+.box{
+  width:min(420px,100%);box-sizing:border-box;background:var(--card);
+  border-radius:8px;padding:14px 16px;text-align:center;font-weight:600;
+  box-shadow:var(--shadow);border-left:6px solid transparent;
+}
+.start{background:var(--accent);color:var(--accent-fg);border-left-color:var(--accent)}
+.process{border-left-color:var(--accent)}
+.decision{background:var(--warn-bg);border-left-color:var(--warn)}
+.success{background:var(--ok-bg);border-left-color:var(--ok)}
+.box small{display:block;font-weight:400;color:var(--muted);font-size:.85rem}
+.arrow{
+  display:flex;flex-direction:column;align-items:center;gap:0;
+  color:var(--line);font-size:.8rem;font-weight:700;line-height:1;padding:4px 0;
+}
+.arrow::before{content:"";width:2px;height:14px;background:var(--line)}
+.arrow::after{content:"▼";font-size:.7rem}
+.arrow .yes{color:var(--ok);margin:3px 0;letter-spacing:.05em}
+.note{background:var(--card);border-radius:8px;padding:8px 20px 14px;margin-top:28px;box-shadow:var(--shadow)}
+.note h2{font-size:1.1rem;margin:14px 0 8px;color:var(--accent)}
+.note p{margin:6px 0}
+.note ul{margin:8px 0;padding-left:1.3em}
+.note li{margin:4px 0}
+.highlight{color:var(--ng);font-size:1.1rem;font-weight:700;text-wrap:balance}
+.warning{color:var(--muted);font-size:.9rem}
+</style>
+
+<div class="container">
+<h1>松葉杖歩行導入フローチャート</h1>
+<p class="subtitle">公文式 松葉杖歩行指導スキーム（ドラフト）</p>
+
+<div class="flow">
+  <div class="box start">荷重制限患者</div>
+  <div class="arrow"></div>
+  <div class="box process">主治医指示確認</div>
+  <div class="arrow"></div>
+  <div class="box decision">荷重量指示を理解できるか？</div>
+  <div class="arrow"><span class="yes">YES</span></div>
+  <div class="box decision">上肢支持能力は十分か？<small>（肘伸展位で体重支持可能）</small></div>
+  <div class="arrow"><span class="yes">YES</span></div>
+  <div class="box decision">固定式歩行器で免荷保持可能か？</div>
+  <div class="arrow"><span class="yes">YES</span></div>
+  <div class="box decision">固定式歩行器で安定して移動できるか？</div>
+  <div class="arrow"><span class="yes">YES</span></div>
+  <div class="box decision">ふらついた際に自力で立て直せるか？</div>
+  <div class="arrow"><span class="yes">YES</span></div>
+  <div class="box success">松葉杖歩行導入</div>
+  <div class="arrow"></div>
+  <div class="box process">三動作歩行練習</div>
+  <div class="arrow"></div>
+  <div class="box decision">方向転換・停止が安定しているか？</div>
+  <div class="arrow"><span class="yes">YES</span></div>
+  <div class="box success">平地歩行自立</div>
+  <div class="arrow"></div>
+  <div class="box process">階段練習へ進む</div>
+</div>
+
+<section class="note">
+  <h2>階段練習ステップ</h2>
+  <p>① 手すり＋松葉杖1本</p>
+  <p>② 手すり＋松葉杖2本重ね持ち</p>
+  <p>③ 両松葉杖</p>
+  <p class="warning">※ 平地歩行が不安定な患者は階段練習を実施しない</p>
+</section>
+
+<section class="note">
+  <h2>重要ポイント</h2>
+  <p class="highlight">「松葉杖で歩けるか」ではなく<br>「ふらついても自力で立て直せるか」で判断する</p>
+  <ul>
+    <li>固定式歩行器で不安定な場合は歩行器継続</li>
+    <li>免荷松葉杖歩行時は患者後方から介助</li>
+    <li>患側横のみからの介助は避ける</li>
+    <li>禁止荷重肢の接地防止を最優先とする</li>
+  </ul>
+</section>
+</div>
