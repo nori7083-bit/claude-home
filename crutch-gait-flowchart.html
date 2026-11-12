@@ -57,6 +57,11 @@ h1{text-align:center;color:var(--accent);font-size:1.7rem;line-height:1.3;margin
 .arrow::before{content:"";width:2px;height:14px;background:var(--line)}
 .arrow::after{content:"▼";font-size:.7rem}
 .arrow .yes{color:var(--ok);margin:3px 0;letter-spacing:.05em}
+.row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 12px;width:100%}
+.row .box{width:min(420px,100%)}
+.no{width:min(260px,100%);box-sizing:border-box;border:2px dashed var(--ng);border-radius:8px;padding:8px 12px;font-size:.85rem;line-height:1.5;display:flex;gap:8px;align-items:baseline}
+.no .lab{color:var(--ng);font-weight:700;flex:none}
+@media (min-width:900px){.flow{align-items:center}.row{width:auto;flex-wrap:nowrap}.row .box{width:420px}.no{width:260px}}
 .note{background:var(--card);border-radius:8px;padding:8px 20px 14px;margin-top:28px;box-shadow:var(--shadow)}
 .note h2{font-size:1.1rem;margin:14px 0 8px;color:var(--accent)}
 .note p{margin:6px 0}
@@ -75,21 +80,39 @@ h1{text-align:center;color:var(--accent);font-size:1.7rem;line-height:1.3;margin
   <div class="arrow"></div>
   <div class="box process">主治医指示確認</div>
   <div class="arrow"></div>
+  <div class="row">
   <div class="box decision">荷重量指示を理解できるか？</div>
+  <div class="no"><span class="lab">NO</span><span>荷重の指導を繰り返す・主治医に再確認。理解できるまで松葉杖は導入しない</span></div>
+  </div>
   <div class="arrow"><span class="yes">YES</span></div>
+  <div class="row">
   <div class="box decision">上肢支持能力は十分か？<small>（肘伸展位で体重支持可能）</small></div>
+  <div class="no"><span class="lab">NO</span><span>上肢の筋力練習を行い、車椅子や歩行器で移動する</span></div>
+  </div>
   <div class="arrow"><span class="yes">YES</span></div>
+  <div class="row">
   <div class="box decision">固定式歩行器で免荷保持可能か？</div>
+  <div class="no"><span class="lab">NO</span><span>免荷の練習を続ける。移動は車椅子などで行う</span></div>
+  </div>
   <div class="arrow"><span class="yes">YES</span></div>
+  <div class="row">
   <div class="box decision">固定式歩行器で安定して移動できるか？</div>
+  <div class="no"><span class="lab">NO</span><span>固定式歩行器を継続する</span></div>
+  </div>
   <div class="arrow"><span class="yes">YES</span></div>
+  <div class="row">
   <div class="box decision">ふらついた際に自力で立て直せるか？</div>
+  <div class="no"><span class="lab">NO</span><span>固定式歩行器を継続し、立て直しの練習をする</span></div>
+  </div>
   <div class="arrow"><span class="yes">YES</span></div>
   <div class="box success">松葉杖歩行導入</div>
   <div class="arrow"></div>
   <div class="box process">三動作歩行練習</div>
   <div class="arrow"></div>
+  <div class="row">
   <div class="box decision">方向転換・停止が安定しているか？</div>
+  <div class="no"><span class="lab">NO</span><span>三動作歩行の練習を続ける</span></div>
+  </div>
   <div class="arrow"><span class="yes">YES</span></div>
   <div class="box success">平地歩行自立</div>
   <div class="arrow"></div>
